@@ -61,6 +61,13 @@ return array(
 	(
 		'allow' => array
 		(
+			/*
+			'acl_disable' => array(
+				'role'      => NULL,
+				'resource'  => NULL,
+				'privilege' => NULL,
+			),
+			 */
 			'user_management' => array(
 				'role'      => 'user',
 				'resource'  => 'user',

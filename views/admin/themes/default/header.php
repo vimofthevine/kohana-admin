@@ -38,3 +38,5 @@
 		<h2>for kyletreubig.com</h2>
 	</hgroup>
 </header>
+
+<?php echo Message::instance()->get() ?>

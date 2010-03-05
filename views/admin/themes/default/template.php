@@ -2,7 +2,6 @@
 <?php
 echo $header;
 echo $menu;
-echo $message;
 echo $content;
 echo $footer;
 ?>

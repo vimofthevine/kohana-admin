@@ -21,7 +21,7 @@ class Controller_Admin_Auth extends Controller_Template_Admin {
 	public function action_login() {
 		if ($this->a2->logged_in())
 		{
-			$this->message('You are already logged in.');
+			Message::instance()->info('You are already logged in.');
 			Request::instance()->redirect( Route::get('admin')->uri() );
 		}
 
@@ -42,7 +42,7 @@ class Controller_Admin_Auth extends Controller_Template_Admin {
 			}
 			elseif ($this->a1->login($post['username'], $post['password'], $remember))
 			{
-				$this->message('Welcome back, :name!', array(':name'=>$user->username));
+				Message::instance()->info('Welcome back, :name!', array(':name'=>$user->username));
 				$referrer = $this->session->get('referrer');
 				$referrer = empty($referrer) ? Route::get('admin')->uri() : $referrer;
 				$this->session->delete('referrer');
@@ -72,7 +72,7 @@ class Controller_Admin_Auth extends Controller_Template_Admin {
 	 */
 	public function action_logout() {
 		$this->a1->logout();
-		$this->message('You have been logged out.  Goodbye!');
+		Message::instance()->info('You have been logged out.  Goodbye!');
 		Request::instance()->redirect( Route::get('admin')->uri() );
 	}
 

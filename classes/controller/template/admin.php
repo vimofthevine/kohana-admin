@@ -19,16 +19,6 @@ abstract class Controller_Template_Admin extends Controller_Template {
 	protected $_config;
 
 	/**
-	 * @var Error message
-	 */
-	public $error = NULL;
-
-	/**
-	 * @var Info message
-	 */
-	public $message = NULL;
-
-	/**
 	 * Configure admin controller
 	 */
 	public function before() {
@@ -48,7 +38,6 @@ abstract class Controller_Template_Admin extends Controller_Template {
 			$this->template          = View::factory($this->_config['template'].'/template');
 			$this->template->header  = View::factory($this->_config['template'].'/header');
 			$this->template->menu    = View::factory($this->_config['template'].'/menu');
-			$this->template->message = View::factory($this->_config['template'].'/message');
 			$this->template->footer  = View::factory($this->_config['template'].'/footer');
 
 			// Bind menu items
@@ -57,13 +46,6 @@ abstract class Controller_Template_Admin extends Controller_Template {
 			// Prepare media arrays
 			$this->template->styles = array();
 			$this->template->scripts = array();
-
-			// Grab error/info messages
-			$this->template->message->msg = $this->session->get('flash_msg');
-			$this->template->message->err = $this->session->get('flash_err');
-			// Delete session variables
-			$this->session->delete('flash_msg');
-			$this->session->delete('flash_err');
 		}
 	}
 
@@ -80,29 +62,7 @@ abstract class Controller_Template_Admin extends Controller_Template {
 			$this->template->header->scripts = array_merge($this->template->scripts, $scripts);
 		}
 
-		Kohana::$log->add(Kohana::DEBUG, 'Message added, '.$this->message);
-
 		parent::after();
-	}
-
-	/**
-	 * Save an info message in the session to display on the
-	 * next page load.
-	 *
-	 * @param   string  info message
-	 */
-	protected function message($msg, array $values = NULL, $lang = 'en-us') {
-		$this->session->set('flash_msg', __($msg, $values, $lang));
-	}
-
-	/**
-	 * Save an error message in the session to display on the
-	 * next page load.
-	 *
-	 * @param   string  error message
-	 */
-	protected function error($msg, array $values = NULL, $lang = 'en-us') {
-		$this->session->set('flash_err', __($msg, $values, $lang));
 	}
 
 	/**
@@ -119,24 +79,19 @@ abstract class Controller_Template_Admin extends Controller_Template {
 	 * @param   string  [optional] error message string
 	 * @param   string  Redirect URL
 	 */
-	protected function restrict($resource=NULL, $privilege=NULL, $message=NULL , $url=NULL) {
-		if ( ! $this->_config['acl_enabled'])
-			return;
-
+	protected function restrict($resource=NULL, $privilege=NULL) {
 		if ( ! $this->a2->allowed($resource, $privilege))
 		{
 			if ($this->a2->get_user() === FALSE)
 			{
 				$this->session->set('referrer', Request::instance()->uri);
-				$this->error('You must be logged in to do that.');
+				Message::instance()->error('You must be logged in to do that.');
 				Request::instance()->redirect( Route::get('admin_auth')->uri(array('action'=>'login')) );
 			}
 			else
 			{
-				$error = isset($message) ? $message : 'You do not have permission to do that.';
-				$this->error($error);
-				$url = isset($url) ? $url : Route::get('admin')->uri();
-				Request::instance()->redirect($url);
+				Message::instance()->error('You do not have permission to do that.');
+				Request::instance()->redirect( Route::get('admin_main')->uri() );
 			}
 		}
 	}

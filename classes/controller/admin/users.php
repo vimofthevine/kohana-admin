@@ -64,15 +64,16 @@ class Controller_Admin_Users extends Controller_Template_Admin {
 		// If user is invalid, return to list
 		if ( ! $user->loaded())
 		{
-			$this->error('That user does not exist.');
+			Message::instance()->error('That user does not exist.');
 			Request::instance()->redirect( Route::get('admin')->uri(array('controller'=>'users')) );
 		}
 
 		// Restrict access
-		$this->restrict($user, 'view',
-			__('You do not have permission to view :name\'s details.', array(':name'=>$user->username)),
-			Route::get('admin')->uri(array('controller'=>'users'))
-		);
+		if ( ! $this->a2->allowed($user, 'view'))
+		{
+			Message::instance()->error('You do not have permission to view :name\'s details.', array(':name'=>$user->username));
+			Request::instance()->redirect( Route::get('admin_main')->uri(array('controller'=>'users')) );
+		}
 
 		$view = new View('admin/users/view');
 		$view->user = $user;
@@ -83,17 +84,19 @@ class Controller_Admin_Users extends Controller_Template_Admin {
 	 * Create a new user
 	 */
 	public function action_new() {
-		$this->restrict('user', 'create',
-			__('You do not have permission to create new users.'),
-			Route::get('admin')->uri(array('controller'=>'users'))
-		);
+		// Restrict access
+		if ( ! $this->a2->allowed('user', 'create'))
+		{
+			Message::instance()->error('You do not have permission to create new users.');
+			Request::instance()->redirect( Route::get('admin')->uri(array('controller'=>'users')) );
+		}
 
 		$user = Sprig::factory('user')->values($_POST);
 
 		try
 		{
 			$user->create();
-			$this->message('The user, :name, has been created.', array(':name'=>$user->username));
+			Message::instance()->info('The user, :name, has been created.', array(':name'=>$user->username));
 			Request::instance()->redirect( Route::get('admin')->uri(array('controller'=>'users')) );
 		}
 		catch (Validate_Exception $e)
@@ -118,15 +121,16 @@ class Controller_Admin_Users extends Controller_Template_Admin {
 		// If user is invalid, return to list
 		if ( ! $user->loaded())
 		{
-			$this->error('That user does not exist.');
+			Message::instance()->error('That user does not exist.');
 			Request::instance()->redirect( Route::get('admin')->uri(array('controller'=>'users')) );
 		}
 
 		// Restrict access
-		$this->restrict($user, 'edit',
-			__('You do not have permission to modify :name.', array(':name'=>$user->username)),
-			Route::get('admin')->uri(array('controller'=>'users'))
-		);
+		if ( ! $this->a2->allowed($user, 'edit'))
+		{
+			Message::instance()->error('You do not have permission to modify :name.', array(':name'=>$user->username));
+			Request::instance()->redirect( Route::get('admin')->uri(array('controller'=>'users')) );
+		}
 
 		// Restrict promotion (change in role)
 		if ( ! $this->a2->allowed($user, 'promote'))
@@ -158,7 +162,7 @@ class Controller_Admin_Users extends Controller_Template_Admin {
 			try
 			{
 				$user->update();
-				$this->message('The user, :name, has been modified.', array(':name'=>$user->username));
+				Message::instance()->info('The user, :name, has been modified.', array(':name'=>$user->username));
 				Request::instance()->redirect( Route::get('admin')->uri(array('controller'=>'users')) );
 			}
 			catch (Validate_Exception $e)
@@ -187,7 +191,7 @@ class Controller_Admin_Users extends Controller_Template_Admin {
 		}
 		else
 		{
-			$this->error('You must be logged in to do that.');
+			Message::instance()->error('You must be logged in to do that.');
 			Request::instance()->redirect( Route::get('admin_auth')
 				->uri(array('action'=>'login'))
 			);
@@ -209,29 +213,30 @@ class Controller_Admin_Users extends Controller_Template_Admin {
 		// If user is invalid, return to list
 		if ( ! $user->loaded())
 		{
-			$this->error('That user does not exist.');
+			Message::instance()->error('That user does not exist.');
 			Request::instance()->redirect( Route::get('admin')->uri(array('controller'=>'users')) );
 		}
 
 		$name = $user->username;
 
 		// Restrict access
-		$this->restrict($user, 'delete',
-			__('You do not have permission to delete :name.', array(':name'=>$name)),
-			Route::get('admin')->uri(array('controller'=>'users'))
-		);
+		if ( ! $this->a2->allowed($user, 'delete'))
+		{
+			Message::instance()->error('You do not have permission to delete :name.', array(':name'=>$name));
+			Request::instance()->redirect( Route::get('admin')->uri(array('controller'=>'users')) );
+		}
 
 		if (isset($_POST['yes']))
 		{
 			try
 			{
 				$user->delete();
-				$this->message('The user, :name, has been deleted.', array(':name'=>$name));
+				Message::instance()->info('The user, :name, has been deleted.', array(':name'=>$name));
 				Request::instance()->redirect( Route::get('admin')->uri(array('controller'=>'users')) );
 			}
 			catch (Exception $e)
 			{
-				$this->error('An error occured deleting user, :name.', array(':name'=>$name));
+				Message::instance()->error('An error occured deleting user, :name.', array(':name'=>$name));
 				Request::instance()->redirect( Route::get('admin')->uri(array('controller'=>'users')) );
 			}
 		}
