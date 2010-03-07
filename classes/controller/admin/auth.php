@@ -22,7 +22,7 @@ class Controller_Admin_Auth extends Controller_Template_Admin {
 		if ($this->a2->logged_in())
 		{
 			Message::instance()->info('You are already logged in.');
-			Request::instance()->redirect( Route::get('admin')->uri() );
+			Request::instance()->redirect( Route::get('admin_main')->uri() );
 		}
 
 		$post = Validate::factory($_POST)
@@ -44,7 +44,7 @@ class Controller_Admin_Auth extends Controller_Template_Admin {
 			{
 				Message::instance()->info('Welcome back, :name!', array(':name'=>$user->username));
 				$referrer = $this->session->get('referrer');
-				$referrer = empty($referrer) ? Route::get('admin')->uri() : $referrer;
+				$referrer = empty($referrer) ? Route::get('admin_main')->uri() : $referrer;
 				$this->session->delete('referrer');
 				Request::instance()->redirect($referrer);
 			}
@@ -73,7 +73,7 @@ class Controller_Admin_Auth extends Controller_Template_Admin {
 	public function action_logout() {
 		$this->a1->logout();
 		Message::instance()->info('You have been logged out.  Goodbye!');
-		Request::instance()->redirect( Route::get('admin')->uri() );
+		Request::instance()->redirect( Route::get('admin_main')->uri() );
 	}
 
 }

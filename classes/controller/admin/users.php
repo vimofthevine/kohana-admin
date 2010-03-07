@@ -16,8 +16,8 @@ class Controller_Admin_Users extends Controller_Template_Admin {
 
 		$this->restrict('user', 'manage');
 		$this->add_menu('users', array(
-			'create' => 'admin/users/new',
-			'edit profile' => 'admin/users/profile',
+			'create' => Route::get('admin_main')->uri(array('controller'=>'users', 'action'=>'new')),
+			'edit profile' => Route::get('admin_main')->uri(array('controller'=>'users', 'action'=>'profile')),
 		));
 	}
 
@@ -42,12 +42,16 @@ class Controller_Admin_Users extends Controller_Template_Admin {
 
 		$grid = new Grid;
 		$grid->column()->field('id')->title('ID');
-		$grid->column('action')->title('Username')->action('admin/users/view')->display_field('username');
+		$grid->column('action')->title('Username')->display_field('username')
+			->action(Route::get('admin_main')->uri(array('controller'=>'users', 'action'=>'view')));
 		$grid->column()->field('role')->title('Role');
 		$grid->column()->field('email')->title('Email');
-		$grid->column('action')->title('Edit')->action('admin/users/edit')->text('edit');
-		$grid->column('action')->title('Del')->action('admin/users/delete')->text('del');
-		$grid->link()->action('admin/users/new')->text('Add User');
+		$grid->column('action')->title('Edit')->text('edit')
+			->action(Route::get('admin_main')->uri(array('controller'=>'users', 'action'=>'edit')));
+		$grid->column('action')->title('Del')->text('del')
+			->action(Route::get('admin_main')->uri(array('controller'=>'users', 'action'=>'delete')));
+		$grid->link()->text('Add User')
+			->action(Route::get('admin_main')->uri(array('controller'=>'users', 'action'=>'new')));
 		$grid->data($users);
 
 		$this->template->content = new View('admin/users/list');
@@ -65,7 +69,7 @@ class Controller_Admin_Users extends Controller_Template_Admin {
 		if ( ! $user->loaded())
 		{
 			Message::instance()->error('That user does not exist.');
-			Request::instance()->redirect( Route::get('admin')->uri(array('controller'=>'users')) );
+			Request::instance()->redirect( Route::get('admin_main')->uri(array('controller'=>'users')) );
 		}
 
 		// Restrict access
@@ -88,7 +92,7 @@ class Controller_Admin_Users extends Controller_Template_Admin {
 		if ( ! $this->a2->allowed('user', 'create'))
 		{
 			Message::instance()->error('You do not have permission to create new users.');
-			Request::instance()->redirect( Route::get('admin')->uri(array('controller'=>'users')) );
+			Request::instance()->redirect( Route::get('admin_main')->uri(array('controller'=>'users')) );
 		}
 
 		$user = Sprig::factory('user')->values($_POST);
@@ -97,7 +101,7 @@ class Controller_Admin_Users extends Controller_Template_Admin {
 		{
 			$user->create();
 			Message::instance()->info('The user, :name, has been created.', array(':name'=>$user->username));
-			Request::instance()->redirect( Route::get('admin')->uri(array('controller'=>'users')) );
+			Request::instance()->redirect( Route::get('admin_main')->uri(array('controller'=>'users')) );
 		}
 		catch (Validate_Exception $e)
 		{
@@ -122,14 +126,14 @@ class Controller_Admin_Users extends Controller_Template_Admin {
 		if ( ! $user->loaded())
 		{
 			Message::instance()->error('That user does not exist.');
-			Request::instance()->redirect( Route::get('admin')->uri(array('controller'=>'users')) );
+			Request::instance()->redirect( Route::get('admin_main')->uri(array('controller'=>'users')) );
 		}
 
 		// Restrict access
 		if ( ! $this->a2->allowed($user, 'edit'))
 		{
 			Message::instance()->error('You do not have permission to modify :name.', array(':name'=>$user->username));
-			Request::instance()->redirect( Route::get('admin')->uri(array('controller'=>'users')) );
+			Request::instance()->redirect( Route::get('admin_main')->uri(array('controller'=>'users')) );
 		}
 
 		// Restrict promotion (change in role)
@@ -163,7 +167,7 @@ class Controller_Admin_Users extends Controller_Template_Admin {
 			{
 				$user->update();
 				Message::instance()->info('The user, :name, has been modified.', array(':name'=>$user->username));
-				Request::instance()->redirect( Route::get('admin')->uri(array('controller'=>'users')) );
+				Request::instance()->redirect( Route::get('admin_main')->uri(array('controller'=>'users')) );
 			}
 			catch (Validate_Exception $e)
 			{
@@ -181,7 +185,7 @@ class Controller_Admin_Users extends Controller_Template_Admin {
 		$user = $this->a1->get_user();
 		if ($user !== FALSE)
 		{
-			Request::instance()->redirect( Route::get('admin')
+			Request::instance()->redirect( Route::get('admin_main')
 				->uri(array(
 					'controller' => 'users',
 					'action'     => 'edit',
@@ -204,7 +208,7 @@ class Controller_Admin_Users extends Controller_Template_Admin {
 	public function action_delete() {
 		if (isset($_POST['no']))
 		{
-			Request::instance()->redirect( Route::get('admin')->uri(array('controller'=>'users')) );
+			Request::instance()->redirect( Route::get('admin_main')->uri(array('controller'=>'users')) );
 		}
 
 		$id = Request::instance()->param('id');
@@ -214,7 +218,7 @@ class Controller_Admin_Users extends Controller_Template_Admin {
 		if ( ! $user->loaded())
 		{
 			Message::instance()->error('That user does not exist.');
-			Request::instance()->redirect( Route::get('admin')->uri(array('controller'=>'users')) );
+			Request::instance()->redirect( Route::get('admin_main')->uri(array('controller'=>'users')) );
 		}
 
 		$name = $user->username;
@@ -223,7 +227,7 @@ class Controller_Admin_Users extends Controller_Template_Admin {
 		if ( ! $this->a2->allowed($user, 'delete'))
 		{
 			Message::instance()->error('You do not have permission to delete :name.', array(':name'=>$name));
-			Request::instance()->redirect( Route::get('admin')->uri(array('controller'=>'users')) );
+			Request::instance()->redirect( Route::get('admin_main')->uri(array('controller'=>'users')) );
 		}
 
 		if (isset($_POST['yes']))
@@ -232,12 +236,12 @@ class Controller_Admin_Users extends Controller_Template_Admin {
 			{
 				$user->delete();
 				Message::instance()->info('The user, :name, has been deleted.', array(':name'=>$name));
-				Request::instance()->redirect( Route::get('admin')->uri(array('controller'=>'users')) );
+				Request::instance()->redirect( Route::get('admin_main')->uri(array('controller'=>'users')) );
 			}
 			catch (Exception $e)
 			{
 				Message::instance()->error('An error occured deleting user, :name.', array(':name'=>$name));
-				Request::instance()->redirect( Route::get('admin')->uri(array('controller'=>'users')) );
+				Request::instance()->redirect( Route::get('admin_main')->uri(array('controller'=>'users')) );
 			}
 		}
 

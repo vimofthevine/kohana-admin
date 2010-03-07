@@ -8,7 +8,7 @@ Route::set('admin_auth', 'admin(/<action>)', array(
 		'controller' => 'auth',
 	));
 
-Route::set('admin', 'admin(/<controller>(/<action>(/<id>)))')
+Route::set('admin_main', 'admin(/<controller>(/<action>(/<id>)))')
 	->defaults(array(
 		'directory'  => 'admin',
 		'controller' => 'main',
