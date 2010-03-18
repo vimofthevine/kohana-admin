@@ -8,12 +8,14 @@
 ?>
 </div>
 
-<div class="grid_12">
+<div class="grid_8">
 <?php
 	$url = Route::get('admin_main')->uri(array(
 		'controller' => 'users',
-		'action' => 'list',
+		'action' => 'new',
 	));
 	echo Request::factory($url) ->execute()->response;
 ?>
 </div>
+
+<div class="grid_4">&nbsp;</div>

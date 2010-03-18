@@ -15,6 +15,14 @@ Route::set('admin_main', 'admin(/<controller>(/<action>(/<id>)))')
 		'action'     => 'index',
 	));
 
+Route::set('admin_media', 'admin/media(/<file>)', array('file'=>'.+'))
+	->defaults(array(
+		'directory'  => 'admin',
+		'controller' => 'media',
+		'action'     => 'file',
+		'file'       => NULL,
+	));
+
 // Static file serving (CSS, JS, images)
 //Route::set('docs/media', 'guide/media(/<file>)', array('file' => '.+'))
 	//->defaults(array(

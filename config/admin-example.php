@@ -2,13 +2,13 @@
 
 return array(
 	// Admin template folder path
-	'template' => 'admin/themes/default',
+	'template' => 'admin/themes/tpd',
 
 	// Admin menu hierarchy array
 	'menu' => array(
-		'home'   => array('admin/main'),
-		'users'  => array('admin/users'),
-		'logout' => array('admin/logout'),
+		'Home'   => array('admin/main'),
+		'Users'  => array('admin/users'),
+		'Logout' => array('admin/logout'),
 	),
 
 );

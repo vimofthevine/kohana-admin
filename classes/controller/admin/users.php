@@ -15,10 +15,14 @@ class Controller_Admin_Users extends Controller_Template_Admin {
 		parent::before();
 
 		$this->restrict('user', 'manage');
-		$this->add_menu('users', array(
+		$this->add_menu('Users', array(
 			'create' => Route::get('admin_main')->uri(array('controller'=>'users', 'action'=>'new')),
 			'edit profile' => Route::get('admin_main')->uri(array('controller'=>'users', 'action'=>'profile')),
 		));
+		if ( ! $this->internal_request)
+		{
+			unset($this->template->menu->menu['Users'][0]);
+		}
 	}
 
 	/**
@@ -29,6 +33,17 @@ class Controller_Admin_Users extends Controller_Template_Admin {
 	}
 
 	/**
+	 * Display menu for user management
+	 */
+	public function action_menu() {
+		if ( ! $this->internal_request)
+		{
+			Request::instance()->redirect(Route::get('admin_main')->uri(array('controller'=>'users')));
+		}
+		$this->template->content = new View('admin/users/widget/menu');
+	}
+
+	/**
 	 * Display list of users
 	 */
 	public function action_list() {
@@ -36,7 +51,9 @@ class Controller_Admin_Users extends Controller_Template_Admin {
 
 		if (count($users) == 0)
 		{
-			$this->template->content = new View('admin/users/none');
+			$this->template->content = $this->internal_request
+				? new View('admin/users/widget/none')
+				: new View('admin/users/none');
 			return;
 		}
 
@@ -46,15 +63,15 @@ class Controller_Admin_Users extends Controller_Template_Admin {
 			->action(Route::get('admin_main')->uri(array('controller'=>'users', 'action'=>'view')));
 		$grid->column()->field('role')->title('Role');
 		$grid->column()->field('email')->title('Email');
-		$grid->column('action')->title('Edit')->text('edit')
+		$grid->column('action')->title('Actions')->text('Edit')->class('edit')
 			->action(Route::get('admin_main')->uri(array('controller'=>'users', 'action'=>'edit')));
-		$grid->column('action')->title('Del')->text('del')
+		$grid->column('action')->title('')->text('Delete')->class('delete')
 			->action(Route::get('admin_main')->uri(array('controller'=>'users', 'action'=>'delete')));
-		$grid->link()->text('Add User')
-			->action(Route::get('admin_main')->uri(array('controller'=>'users', 'action'=>'new')));
 		$grid->data($users);
 
-		$this->template->content = new View('admin/users/list');
+		$this->template->content = $this->internal_request
+			? new View('admin/users/widget/list')
+			: new View('admin/users/list');
 		$this->template->content->grid = $grid;
 	}
 
@@ -79,7 +96,9 @@ class Controller_Admin_Users extends Controller_Template_Admin {
 			Request::instance()->redirect( Route::get('admin_main')->uri(array('controller'=>'users')) );
 		}
 
-		$view = new View('admin/users/view');
+		$view = $this->internal_request
+			? new View('admin/users/widget/view')
+			: new View('admin/users/view');
 		$view->user = $user;
 		$this->template->content = $view;
 	}
@@ -105,7 +124,9 @@ class Controller_Admin_Users extends Controller_Template_Admin {
 		}
 		catch (Validate_Exception $e)
 		{
-			$view = new View('admin/users/form');
+			$view = $this->internal_request
+				? new View('admin/users/widget/form')
+				: new View('admin/users/create');
 			$view->legend = __('Create User');
 			$view->submit = __('Create');
 			$view->user   = $user;
@@ -156,7 +177,9 @@ class Controller_Admin_Users extends Controller_Template_Admin {
 		}
 
 		$user->values($_POST);
-		$view = new View('admin/users/form');
+		$view = $this->internal_request
+			? new View('admin/users/widget/form')
+			: new View('admin/users/edit');
 		$view->legend = __('Modify User');
 		$view->submit = __('Save');
 		$view->user   = $user;
@@ -245,7 +268,9 @@ class Controller_Admin_Users extends Controller_Template_Admin {
 			}
 		}
 
-		$view = new View('admin/users/delete');
+		$view = $this->internal_request
+			? new View('admin/users/widget/delete')
+			: new View('admin/users/delete');
 		$view->user = $user;
 		$this->template->content = $view;
 	}

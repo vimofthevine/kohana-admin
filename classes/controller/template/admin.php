@@ -19,6 +19,11 @@ abstract class Controller_Template_Admin extends Controller_Template {
 	protected $_config;
 
 	/**
+	 * @var Internal request
+	 */
+	protected $internal_request = FALSE;
+
+	/**
 	 * Configure admin controller
 	 */
 	public function before() {
@@ -31,6 +36,14 @@ abstract class Controller_Template_Admin extends Controller_Template {
 		$this->a2 = A2::instance('auth');
 		$this->a1 = $this->a2->a1;
 		$this->session = Session::instance();
+
+		// Check if internal request
+		if ($this->request !== Request::instance())
+		{
+			//$this->auto_render = FALSE;
+			$this->internal_request = TRUE;
+			//$this->template = View::factory('admin/internal');
+		}
 
 		if ($this->auto_render)
 		{
@@ -60,6 +73,13 @@ abstract class Controller_Template_Admin extends Controller_Template {
 
 			$this->template->header->styles  = array_merge($this->template->styles, $styles);
 			$this->template->header->scripts = array_merge($this->template->scripts, $scripts);
+		}
+
+		if ($this->internal_request)
+		{
+			//$this->auto_render = TRUE;
+			$content = $this->template->content;
+			$this->template = $content;
 		}
 
 		parent::after();

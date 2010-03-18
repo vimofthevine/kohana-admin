@@ -54,7 +54,9 @@ class Controller_Admin_Auth extends Controller_Template_Admin {
 			}
 		}
 
-		$view = new View('admin/auth/login');
+		$view = $this->internal_request
+			? new View('admin/auth/widget/login')
+			: new View('admin/auth/login');
 		$form = $errors = array(
 			'username' => '',
 			'password' => '',

@@ -3,12 +3,16 @@
 return array(
 	'tags' => array(
 		'error' => array(
-			'open'  => '<span class="error">',
-			'close' => '</span>',
+			'open'  => '<p class="error">',
+			'close' => '</p>',
+			//'open'  => '<span class="error">',
+			//'close' => '</span>',
 		),
 		'info' => array(
-			'open'  => '<span class="info">',
-			'close' => '</span>',
+			'open'  => '<p class="success">',
+			'close' => '</p>',
+			//'open'  => '<span class="info">',
+			//'close' => '</span>',
 		),
 	),
 	'session_type' => 'native',

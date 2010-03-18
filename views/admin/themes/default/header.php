@@ -24,6 +24,8 @@
 		table.sortable thead tr { background:#ddd; }
 		table.sortable tbody tr:nth-child(even) { background:#eee; }
 	</style>
+<?php foreach ($styles as $style => $media) echo HTML::style($style, array('media' => $media), TRUE), "\n" ?>
+<?php foreach ($scripts as $script) echo HTML::script($script, NULL, TRUE), "\n" ?>
 </head>
 <?php
 	echo '<body';

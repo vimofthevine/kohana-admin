@@ -1,13 +1,19 @@
-<section>
-	<h1>Delete <?php echo $user->username ?>?</h1>
-	<p>
-		Are you sure you want to delete <?php echo $user->username ?>?
-		This action cannot be undone.
-	</p>
+<div class="grid_4">
 <?php
-	echo Form::open();
-	echo Form::submit('yes', 'Yes');
-	echo Form::submit('no', 'No');
-	echo Form::close();
+	$url = Route::get('admin_main')->uri(array(
+		'controller' => 'users',
+		'action' => 'menu',
+	));
+	echo Request::factory($url)->execute()->response;
 ?>
-</section>
+</div>
+
+<div class="grid_12">
+<?php
+	$url = Route::get('admin_main')->uri(array(
+		'controller' => 'users',
+		'action' => 'delete',
+	));
+	echo Request::factory($url)->execute()->response;
+?>
+</div>
