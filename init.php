@@ -1,18 +1,11 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 
-Route::set('admin_auth', 'admin(/<action>)', array(
+Route::set('admin_auth', 'admin/<action>', array(
 	'action' => 'login|logout',
 	))
 	->defaults(array(
 		'directory'  => 'admin',
 		'controller' => 'auth',
-	));
-
-Route::set('admin_main', 'admin(/<controller>(/<action>(/<id>)))')
-	->defaults(array(
-		'directory'  => 'admin',
-		'controller' => 'main',
-		'action'     => 'index',
 	));
 
 Route::set('admin_media', 'admin/media(/<file>)', array('file'=>'.+'))
@@ -21,6 +14,13 @@ Route::set('admin_media', 'admin/media(/<file>)', array('file'=>'.+'))
 		'controller' => 'media',
 		'action'     => 'file',
 		'file'       => NULL,
+	));
+
+Route::set('admin_main', 'admin(/<controller>(/<action>(/<id>)))')
+	->defaults(array(
+		'directory'  => 'admin',
+		'controller' => 'main',
+		'action'     => 'index',
 	));
 
 // Static file serving (CSS, JS, images)

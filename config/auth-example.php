@@ -43,9 +43,9 @@ return array(
 	 */
 	'resources' => array
 	(
-		'page' => NULL,
-		'user' => NULL,
-		'blog' => NULL,
+		'page'  => NULL,
+		'asset' => NULL,
+		'user'  => NULL,
 	),
 
 	/*
@@ -87,6 +87,11 @@ return array(
 			'page_management' => array(
 				'role'      => 'admin',
 				'resource'  => 'page',
+				'privilege' => NULL,
+			),
+			'asset_management' => array(
+				'role'      => 'admin',
+				'resource'  => 'asset',
 				'privilege' => NULL,
 			),
 			'blog_management' => array(
