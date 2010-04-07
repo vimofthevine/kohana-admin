@@ -1,0 +1,6 @@
+/* Fix markItUp textarea widths */
+.grid_12 textarea { width:643px; }
+
+/* History link class */
+a.history { padding-left:25px; background-repeat:no-repeat; background-position:left center; }
+a.history { background-image:url(clock.png) }

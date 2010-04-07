@@ -14,24 +14,24 @@
 </div>
 
 <div class="grid_6">
-	<div class="box"
+	<div class="box">
 <?php
 	$url = Route::get('admin_main')->uri(array('action' => 'updates'));
 	echo Request::factory($url)->execute()->response;
 ?>
 	</div>
-	<div class="box"
+	<div class="box">
 <?php
 	$url = Route::get('admin_main')->uri(array(
 		'controller' => 'page',
-		'action' => 'list'));
+		'action' => 'list_widget'));
 	echo Request::factory($url)->execute()->response;
 ?>
 	</div>
 </div>
 
 <div class="grid_5">
-	<div class="box"
+	<div class="box">
 <?php
 	$url = Route::get('admin_main')->uri(array(
 		'controller' => 'support',

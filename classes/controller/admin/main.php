@@ -69,6 +69,7 @@ class Controller_Admin_Main extends Controller_Template_Admin {
 		}
 
 		$view->mysql_version = mysql_get_server_info();
+		$view->app_version = defined('APP_VERSION') ? APP_VERSION : '0.1';
 
 		$this->template->content = $view;
 	}

@@ -7,6 +7,7 @@
 		<?php echo HTML::style(Route::get('admin_media')->uri(array('file'=>'ThePixelDeveloper_Admin-Template/css/960.css')), array('media'=>'screen')) ?> 
 		<?php echo HTML::style(Route::get('admin_media')->uri(array('file'=>'ThePixelDeveloper_Admin-Template/css/template.css')), array('media'=>'screen')) ?> 
 		<?php echo HTML::style(Route::get('admin_media')->uri(array('file'=>'ThePixelDeveloper_Admin-Template/css/colour.css')), array('media'=>'screen')) ?> 
+		<?php echo HTML::style(Route::get('admin_media')->uri(array('file'=>'css/admin/tpd_custom.css')), array('media'=>'screen')) ?> 
 <?php foreach ($styles as $style => $media): ?>
 		<?php echo HTML::style($style, array('media' => $media), TRUE), PHP_EOL ?>
 <?php endforeach; ?>
