@@ -4,11 +4,15 @@
 	<head>
 		<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
 		<title>Administrative Control Panel</title>
-		<?php echo HTML::style(Route::get('admin_media')->uri(array('file'=>'ThePixelDeveloper_Admin-Template/css/960.css')), array('media'=>'screen')) ?>
-		<?php echo HTML::style(Route::get('admin_media')->uri(array('file'=>'ThePixelDeveloper_Admin-Template/css/template.css')), array('media'=>'screen')) ?>
-		<?php echo HTML::style(Route::get('admin_media')->uri(array('file'=>'ThePixelDeveloper_Admin-Template/css/colour.css')), array('media'=>'screen')) ?>
-		<?php foreach ($styles as $style => $media) echo HTML::style($style, array('media' => $media), TRUE), "\n" ?>
-		<?php foreach ($scripts as $script) echo HTML::script($script, NULL, TRUE), "\n" ?>
+		<?php echo HTML::style(Route::get('admin_media')->uri(array('file'=>'ThePixelDeveloper_Admin-Template/css/960.css')), array('media'=>'screen')) ?> 
+		<?php echo HTML::style(Route::get('admin_media')->uri(array('file'=>'ThePixelDeveloper_Admin-Template/css/template.css')), array('media'=>'screen')) ?> 
+		<?php echo HTML::style(Route::get('admin_media')->uri(array('file'=>'ThePixelDeveloper_Admin-Template/css/colour.css')), array('media'=>'screen')) ?> 
+<?php foreach ($styles as $style => $media): ?>
+		<?php echo HTML::style($style, array('media' => $media), TRUE), PHP_EOL ?>
+<?php endforeach; ?>
+<?php foreach ($scripts as $script): ?>
+		<?php echo HTML::script($script, NULL, TRUE), PHP_EOL ?>
+<?php endforeach; ?>
 	</head>
 	<body>
 

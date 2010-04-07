@@ -20,6 +20,14 @@
 	echo Request::factory($url)->execute()->response;
 ?>
 	</div>
+	<div class="box"
+<?php
+	$url = Route::get('admin_main')->uri(array(
+		'controller' => 'page',
+		'action' => 'list'));
+	echo Request::factory($url)->execute()->response;
+?>
+	</div>
 </div>
 
 <div class="grid_5">

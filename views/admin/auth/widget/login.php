@@ -1,4 +1,4 @@
-<h1>Login</h1>
+<h2>Login</h2>
 <?php echo Form::open(); ?>
 
 <?php echo empty($errors['username']) ? '' : '<p class="error">'.$errors['username'].'</p>'; ?> 

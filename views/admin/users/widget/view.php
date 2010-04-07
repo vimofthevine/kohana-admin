@@ -1,4 +1,4 @@
-<h1><?php echo $user->username ?></h1>
+<h2><?php echo $user->username ?></h2>
 <dl>
 	<dt>Username:</dt>
 	<dd><?php echo $user->username ?></dd>

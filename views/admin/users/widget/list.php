@@ -1,2 +1,2 @@
-<h1>Users List</h1>
+<h2>Users List</h2>
 <?php echo $grid; ?>
