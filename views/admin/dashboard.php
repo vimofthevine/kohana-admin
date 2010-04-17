@@ -24,7 +24,7 @@
 <?php
 	$url = Route::get('admin_main')->uri(array(
 		'controller' => 'page',
-		'action' => 'list'));
+		'action' => 'list_widget'));
 	echo Request::factory($url)->execute()->response;
 ?>
 	</div>

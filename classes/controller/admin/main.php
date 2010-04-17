@@ -7,10 +7,8 @@ class Controller_Admin_Main extends Controller_Template_Admin {
 		{
 			Request::instance()->redirect( Route::get('admin_auth')->uri(array('action'=>'login')) );
 		}
-		if ( ! $this->internal_request)
-		{
-			unset($this->template->menu->menu['Home'][0]);
-		}
+
+		unset($this->template->menu->menu['Home'][0]);
 
 		$this->template->scripts[] = Route::get('admin_media')->uri(array('file'=>'ThePixelDeveloper_Admin-Template/js/glow/1.7.0/core/core.js'));
 		$this->template->scripts[] = Route::get('admin_media')->uri(array('file'=>'ThePixelDeveloper_Admin-Template/js/glow/1.7.0/widgets/widgets.js'));
@@ -24,6 +22,7 @@ class Controller_Admin_Main extends Controller_Template_Admin {
 		{
 			Request::instance()->redirect( Route::get('admin_main')->uri() );
 		}
+
 		$view = new View('admin/dashboard/user_info');
 		$view->user = $this->a1->get_user();
 		$view->ip = isset($_SERVER['HTTP_X_FORWARD_FOR'])
