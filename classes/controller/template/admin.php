@@ -38,11 +38,9 @@ abstract class Controller_Template_Admin extends Controller_Template {
 		$this->session = Session::instance();
 
 		// Check if internal request
-		if ($this->request !== Request::instance())
+		if ($this->request !== Request::instance() OR Request::$is_ajax)
 		{
-			//$this->auto_render = FALSE;
 			$this->internal_request = TRUE;
-			//$this->template = View::factory('admin/internal');
 		}
 
 		if ($this->auto_render)
@@ -77,7 +75,6 @@ abstract class Controller_Template_Admin extends Controller_Template {
 
 		if ($this->internal_request)
 		{
-			//$this->auto_render = TRUE;
 			$content = $this->template->content;
 			$this->template = $content;
 		}
@@ -104,14 +101,32 @@ abstract class Controller_Template_Admin extends Controller_Template {
 		{
 			if ($this->a2->get_user() === FALSE)
 			{
-				$this->session->set('referrer', Request::instance()->uri);
-				Message::instance()->error('You must be logged in to do that.');
-				Request::instance()->redirect( Route::get('admin_auth')->uri(array('action'=>'login')) );
+				// Return message if an ajax request
+				if (Request::$is_ajax)
+				{
+					$this->template->content = __('You must be logged in to do that.');
+				}
+				// Else set flash message and redirect
+				else
+				{
+					$this->session->set('referrer', Request::instance()->uri);
+					Message::instance()->error('You must be logged in to do that.');
+					Request::instance()->redirect( Route::get('admin_auth')->uri(array('action'=>'login')) );
+				}
 			}
 			else
 			{
-				Message::instance()->error('You do not have permission to do that.');
-				Request::instance()->redirect( Route::get('admin_main')->uri() );
+				// Return message if an ajax request
+				if (Request::$is_ajax)
+				{
+					$this->template->content = __('You do not have permission to do that.');
+				}
+				// Else set flash message and redirect
+				else
+				{
+					Message::instance()->error('You do not have permission to do that.');
+					Request::instance()->redirect( Route::get('admin_main')->uri() );
+				}
 			}
 		}
 	}

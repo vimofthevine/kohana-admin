@@ -19,10 +19,23 @@ class Controller_Admin_Auth extends Controller_Template_Admin {
 	 * Display login form and perform login
 	 */
 	public function action_login() {
+		Kohana::$log->add(Kohana::DEBUG, 'Executing Controller_Auth::action_login');
+
 		if ($this->a2->logged_in())
 		{
-			Message::instance()->info('You are already logged in.');
-			Request::instance()->redirect( Route::get('admin_main')->uri() );
+			$message = __('You are already logged in.');
+
+			// Return message if an ajax request
+			if (Request::$is_ajax)
+			{
+				$this->template->content = $message;
+			}
+			// Else set flash message and redirect
+			else
+			{
+				Message::instance()->error($message);
+				Request::instance()->redirect( Route::get('admin_main')->uri() );
+			}
 		}
 
 		$post = Validate::factory($_POST)
@@ -42,11 +55,24 @@ class Controller_Admin_Auth extends Controller_Template_Admin {
 			}
 			elseif ($this->a1->login($post['username'], $post['password'], $remember))
 			{
-				Message::instance()->info('Welcome back, :name!', array(':name'=>$user->username));
+				$message = __('Welcome back, :name!', array(':name'=>$user->username));
+
+				// Get referring URI, if any
 				$referrer = $this->session->get('referrer');
 				$referrer = empty($referrer) ? Route::get('admin_main')->uri() : $referrer;
 				$this->session->delete('referrer');
-				Request::instance()->redirect($referrer);
+
+				// Return message if an ajax request
+				if (Request::$is_ajax)
+				{
+					$this->template->content = $message;
+				}
+				// Else set flash message and redirect
+				else
+				{
+					Message::instance()->info($message);
+					Request::instance()->redirect($referrer);
+				}
 			}
 			else
 			{
@@ -54,28 +80,43 @@ class Controller_Admin_Auth extends Controller_Template_Admin {
 			}
 		}
 
-		$view = $this->internal_request
-			? new View('admin/auth/widget/login')
-			: new View('admin/auth/login');
 		$form = $errors = array(
 			'username' => '',
 			'password' => '',
 			'remember' => '',
 		);
 
-		$view->form = Arr::overwrite($form, $post->as_array());
-		$view->errors = Arr::overwrite($errors, $post->errors('auth'));
+		$hmvc = View::factory('admin/auth/hmvc/login')
+			->set('form', Arr::overwrite($form, $post->as_array()))
+			->set('errors', Arr::overwrite($errors, $post->errors('auth')));
 
-		$this->template->content = $view;
+		$view = View::factory('admin/auth/login')
+			->set('form', $hmvc);
+
+		// Set request response
+		$this->template->content = $this->internal_request ? $hmvc : $view;
 	}
 
 	/**
 	 * Perform user logout
 	 */
 	public function action_logout() {
+		Kohana::$log->add(Kohana::DEBUG, 'Executing Controller_Auth::action_logout');
 		$this->a1->logout();
-		Message::instance()->info('You have been logged out.  Goodbye!');
-		Request::instance()->redirect( Route::get('admin_main')->uri() );
+
+		$message = __('You have been logged out.  Goodbye!');
+
+		// Return message if an ajax request
+		if (Request::$is_ajax)
+		{
+			$this->template->content = $message;
+		}
+		// Else set flash message and redirect
+		else
+		{
+			Message::instance()->info($message);
+			Request::instance()->redirect( Route::get('admin_main')->uri() );
+		}
 	}
 
 }
