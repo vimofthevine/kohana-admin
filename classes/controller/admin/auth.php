@@ -23,6 +23,7 @@ class Controller_Admin_Auth extends Controller_Template_Admin {
 
 		if ($this->a2->logged_in())
 		{
+			Kohana::$log->add('ACCESS', "Attempt to login made by logged-in user");
 			$message = __('You are already logged in.');
 
 			// Return message if an ajax request
@@ -51,10 +52,12 @@ class Controller_Admin_Auth extends Controller_Template_Admin {
 
 			if ( ! $user->loaded())
 			{
+				Kohana::$log->add('ACCESS', 'Attempt to login made with unknown username, '.$post['username']);
 				$post->error('username', 'not_found');
 			}
 			elseif ($this->a1->login($post['username'], $post['password'], $remember))
 			{
+				Kohana::$log->add('ACCESS', 'Successful login made with username, '.$user->username);
 				$message = __('Welcome back, :name!', array(':name'=>$user->username));
 
 				// Get referring URI, if any
@@ -76,6 +79,7 @@ class Controller_Admin_Auth extends Controller_Template_Admin {
 			}
 			else
 			{
+				Kohana::$log->add('ACCESS', 'Unsuccessful login attempt made with username, '.$post['username']);
 				$post->error('password', 'incorrect');
 			}
 		}
@@ -104,6 +108,7 @@ class Controller_Admin_Auth extends Controller_Template_Admin {
 		Kohana::$log->add(Kohana::DEBUG, 'Executing Controller_Auth::action_logout');
 		$this->a1->logout();
 
+		Kohana::$log->add('ACCESS', 'Successful logout made by user.');
 		$message = __('You have been logged out.  Goodbye!');
 
 		// Return message if an ajax request
