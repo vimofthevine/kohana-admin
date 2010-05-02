@@ -67,8 +67,10 @@ class Controller_Admin_Main extends Controller_Template_Admin {
 			}
 		}
 
-		$view->mysql_version = mysql_get_server_info();
+		$mysql_version = mysql_get_server_info();
+		$view->mysql_version = $mysql_version ? $mysql_version : 'unavailable';
 		$view->app_version = defined('APP_VERSION') ? APP_VERSION : '0.1';
+		$view->kohana_version = Kohana::VERSION;
 
 		$this->template->content = $view;
 	}
