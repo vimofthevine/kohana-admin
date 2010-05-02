@@ -38,7 +38,7 @@ class Controller_Admin_Users extends Controller_Template_Admin {
 	public function action_menu() {
 		if ( ! $this->internal_request)
 		{
-			Request::instance()->redirect( Route::get('admin_main')->uri('controller'=>'users') );
+			Request::instance()->redirect( Route::get('admin_main')->uri(array('controller'=>'users')) );
 		}
 
 		$this->template->content = $this->menu();
