@@ -68,14 +68,14 @@ class Controller_Admin_Users extends Controller_Template_Admin {
 		// Create user list
 		$grid = new Grid;
 		$grid->column()->field('id')->title('ID');
-		$grid->column('action')->title('Username')->display_field('username')
-			->action(Route::get('admin_main')->uri(array('controller'=>'users', 'action'=>'view')));
+		$grid->column('action')->title('Username')->text('{username}')
+			->route(Route::get('admin_main'))->params(array('controller'=>'users', 'action'=>'view'));
 		$grid->column()->field('role')->title('Role');
 		$grid->column()->field('email')->title('Email');
 		$grid->column('action')->title('Actions')->text('Edit')->class('edit')
-			->action(Route::get('admin_main')->uri(array('controller'=>'users', 'action'=>'edit')));
+			->route(Route::get('admin_main'))->params(array('controller'=>'users', 'action'=>'edit'));
 		$grid->column('action')->title('')->text('Delete')->class('delete')
-			->action(Route::get('admin_main')->uri(array('controller'=>'users', 'action'=>'delete')));
+			->route(Route::get('admin_main'))->params(array('controller'=>'users', 'action'=>'delete'));
 		$grid->data($users);
 
 		// Setup HMVC view with data
