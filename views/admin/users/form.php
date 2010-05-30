@@ -1,9 +1,15 @@
-<div class="grid_4">
-<?php echo $menu ?> 
-</div>
+<h2><?php echo __($legend) ?></h2>
+<?php echo Form::open() ?> 
 
-<div class="grid_8">
-<?php echo $form ?> 
-</div>
+<?php foreach ($user->inputs(FALSE) as $field=>$input): ?>
+<?php echo isset($errors[$field]) ? '<p class="error">'.$errors[$field].'</p>' : NULL ?> 
+<p>
+	<?php echo $user->label($field) ?> 
+	<?php echo $input ?> 
+</p>
+<?php endforeach ?>
 
-<div class="grid_4">&nbsp;</div>
+<p class="submit">
+	<?php echo Form::submit('submit', $submit) ?> 
+</p>
+<?php echo Form::close() ?> 

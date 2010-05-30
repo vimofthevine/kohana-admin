@@ -1,6 +1,6 @@
-<footer>
-<p>Version 0.2.0 | &#169; 2009-<?php echo date("Y") ?> Kyle Treubig</p>
-</footer>
+			<div id="foot">
+				<i>Designed by </i><a href="http://mathew-davies.co.uk/">Mathew Davies</a>
+			</div>
 
-</body>
+	</body>
 </html>

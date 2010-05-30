@@ -1,7 +1,10 @@
-<?php defined('SYSPATH') OR die('No direct script access.');
+<?php defined('SYSPATH') or die('No direct script access.');
 
 /**
+ * Admin Template Controller
+ *
  * @package     Admin
+ * @category    Base
  * @author      Kyle Treubig
  * @copyright   (c) 2010 Kyle Treubig
  * @license     MIT
@@ -19,9 +22,9 @@ abstract class Controller_Template_Admin extends Controller_Template {
 	protected $_config;
 
 	/**
-	 * @var Internal request
+	 * @var Current navigation item
 	 */
-	protected $internal_request = FALSE;
+	protected $_current_nav = NULL;
 
 	/**
 	 * Configure admin controller
@@ -32,17 +35,6 @@ abstract class Controller_Template_Admin extends Controller_Template {
 		// Load admin config
 		$this->_config = Kohana::config('admin');
 
-		// Set common variables
-		$this->a2 = A2::instance('auth');
-		$this->a1 = $this->a2->a1;
-		$this->session = Session::instance();
-
-		// Check if internal request
-		if ($this->request !== Request::instance() OR Request::$is_ajax)
-		{
-			$this->internal_request = TRUE;
-		}
-
 		if ($this->auto_render)
 		{
 			// Prepare templates
@@ -50,98 +42,28 @@ abstract class Controller_Template_Admin extends Controller_Template {
 			$this->template->header  = View::factory($this->_config['template'].'/header');
 			$this->template->menu    = View::factory($this->_config['template'].'/menu');
 			$this->template->footer  = View::factory($this->_config['template'].'/footer');
+			$this->template->content = '';
 
 			// Bind menu items
-			$this->template->menu->bind('menu', $this->_config['menu']);
+			$this->template->menu->bind('links', $this->_config['menu']);
 
 			// Prepare media arrays
-			$this->template->styles = array();
-			$this->template->scripts = array();
+			$this->template->set_global('styles', array());
+			$this->template->set_global('scripts', array());
 		}
 	}
 
 	/**
-	 * Perform pre-render actions on admin controller
+	 * Unset current navigation item
 	 */
 	public function after() {
-		if ($this->auto_render)
+		$key = array_search($this->_current_nav, $this->_config['menu']);
+		if ($key)
 		{
-			$styles = array();
-			$scripts = array();
-
-			$this->template->header->styles  = array_merge($this->template->styles, $styles);
-			$this->template->header->scripts = array_merge($this->template->scripts, $scripts);
-		}
-
-		if ($this->internal_request)
-		{
-			$content = $this->template->content;
-			$this->template = $content;
+			$this->_config['menu'][$key] = NULL;
 		}
 
 		parent::after();
-	}
-
-	/**
-	 * Perform an ACL check against a resource and privilege.
-	 * <ul>
-	 *  <li>If the current user is not allowed access, redirect
-	 *    to the main page.</li>
-	 *  <li>If the current user is not logged in, redirect to
-	 *    the login page, setting the referrer url.</li>
-	 * </ul>
-	 *
-	 * @param   string  An ACL resource
-	 * @param   string  Privilege on the resource
-	 * @param   string  [optional] error message string
-	 * @param   string  Redirect URL
-	 */
-	protected function restrict($resource=NULL, $privilege=NULL) {
-		if ( ! $this->a2->allowed($resource, $privilege))
-		{
-			if ($this->a2->get_user() === FALSE)
-			{
-				// Return message if an ajax request
-				if (Request::$is_ajax)
-				{
-					$this->template->content = __('You must be logged in to do that.');
-				}
-				// Else set flash message and redirect
-				else
-				{
-					$this->session->set('referrer', Request::instance()->uri);
-					Message::instance()->error('You must be logged in to do that.');
-					Request::instance()->redirect( Route::get('admin_auth')->uri(array('action'=>'login')) );
-				}
-			}
-			else
-			{
-				// Return message if an ajax request
-				if (Request::$is_ajax)
-				{
-					$this->template->content = __('You do not have permission to do that.');
-				}
-				// Else set flash message and redirect
-				else
-				{
-					Message::instance()->error('You do not have permission to do that.');
-					Request::instance()->redirect( Route::get('admin_main')->uri() );
-				}
-			}
-		}
-	}
-
-	/**
-	 * Add items to the admin menu template
-	 *
-	 * @param   string  the menu item key
-	 * @param   string  an array for the menu item
-	 */
-	protected function add_menu($key, $menu) {
-		if (array_key_exists($key, $this->_config['menu']))
-		{
-			$this->_config['menu'][$key][1] = $menu;
-		}
 	}
 
 }	// End of Controller_Template_Admin

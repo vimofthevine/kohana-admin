@@ -1,19 +1,21 @@
-<?php defined('SYSPATH') OR die('No direct script access.');
+<?php defined('SYSPATH') or die('No direct script access.');
 
 /**
- * @package     Controller
+ * Authentication Controller
+ *
+ * @package     Admin
+ * @category    Controller
  * @author      Kyle Treubig
  * @copyright   (c) 2010 Kyle Treubig
  * @license     MIT
  */
-class Controller_Admin_Auth extends Controller_Template_Admin {
+class Controller_Admin_Auth extends Controller_Admin {
 
-	/**
-	 * Register controller as an admin controller
-	 */
-	public function before() {
-		parent::before();
-	}
+	protected $_view_map = array(
+		'login'   => 'admin/layout/narrow_column',
+	);
+
+	protected $_current_nav = 'admin/login';
 
 	/**
 	 * Display login form and perform login
@@ -21,84 +23,56 @@ class Controller_Admin_Auth extends Controller_Template_Admin {
 	public function action_login() {
 		Kohana::$log->add(Kohana::DEBUG, 'Executing Controller_Auth::action_login');
 
+		// If user is already logged in, redirect to admin main
 		if ($this->a2->logged_in())
 		{
 			Kohana::$log->add('ACCESS', "Attempt to login made by logged-in user");
-			$message = __('You are already logged in.');
-
-			// Return message if an ajax request
-			if (Request::$is_ajax)
-			{
-				$this->template->content = $message;
-			}
-			// Else set flash message and redirect
-			else
-			{
-				Message::instance()->error($message);
-				Request::instance()->redirect( Route::get('admin_main')->uri() );
-			}
+			Kohana::$log->add(Kohana::DEBUG, "Attempt to login made by logged-in user");
+			Message::instance()->error(Kohana::message('a2', 'login.already'));
+			$this->request->redirect( Route::get('admin')->uri() );
 		}
+
+		$this->template->content = View::factory('admin/auth/login')
+			->bind('post', $post)
+			->bind('errors', $errors);
 
 		$post = Validate::factory($_POST)
 			->filter(TRUE, 'trim')
 			->rule('username', 'not_empty')
-			->rule('password', 'not_empty');
+			->rule('password', 'not_empty')
+			->callback('username', array($this, 'check_username'));
 
 		if ($post->check())
 		{
-			$user = Sprig::factory('user', array('username'=>$post['username']))->load();
-
-			$remember = isset($post['remember']) ? (bool) $post['remember'] : FALSE;
-
-			if ( ! $user->loaded())
+			if ($this->a1->login($post['username'], $post['password'],
+				! empty($post['remember'])))
 			{
-				Kohana::$log->add('ACCESS', 'Attempt to login made with unknown username, '.$post['username']);
-				$post->error('username', 'not_found');
-			}
-			elseif ($this->a1->login($post['username'], $post['password'], $remember))
-			{
-				Kohana::$log->add('ACCESS', 'Successful login made with username, '.$user->username);
-				$message = __('Welcome back, :name!', array(':name'=>$user->username));
+				Kohana::$log->add('ACCESS', 'Successful login made with username, '
+					.$post['username']);
+				Message::instance()->info(Kohana::message('a2', 'login.success'),
+					array(':name' => $post['username']));
 
-				// Get referring URI, if any
-				$referrer = $this->session->get('referrer');
-				$referrer = empty($referrer) ? Route::get('admin_main')->uri() : $referrer;
-				$this->session->delete('referrer');
+				// If external request, redirect to referring URL or admin main
+				if ( ! $this->_internal)
+				{
+					// Get referring URI, if any
+					$referrer = $this->session->get('referrer')
+						? $this->session->get('referrer')
+						: Route::get('admin')->uri();
+					$this->session->delete('referrer');
 
-				// Return message if an ajax request
-				if (Request::$is_ajax)
-				{
-					$this->template->content = $message;
-				}
-				// Else set flash message and redirect
-				else
-				{
-					Message::instance()->info($message);
-					Request::instance()->redirect($referrer);
+					$this->request->redirect($referrer);
 				}
 			}
 			else
 			{
-				Kohana::$log->add('ACCESS', 'Unsuccessful login attempt made with username, '.$post['username']);
+				Kohana::$log->add('ACCESS', 'Unsuccessful login attempt made with username, '
+					.$post['username']);
 				$post->error('password', 'incorrect');
 			}
 		}
 
-		$form = $errors = array(
-			'username' => '',
-			'password' => '',
-			'remember' => '',
-		);
-
-		$hmvc = View::factory('admin/auth/hmvc/login')
-			->set('form', Arr::overwrite($form, $post->as_array()))
-			->set('errors', Arr::overwrite($errors, $post->errors('auth')));
-
-		$view = View::factory('admin/auth/login')
-			->set('form', $hmvc);
-
-		// Set request response
-		$this->template->content = $this->internal_request ? $hmvc : $view;
+		$errors = $post->errors('admin');
 	}
 
 	/**
@@ -109,19 +83,26 @@ class Controller_Admin_Auth extends Controller_Template_Admin {
 		$this->a1->logout();
 
 		Kohana::$log->add('ACCESS', 'Successful logout made by user.');
-		$message = __('You have been logged out.  Goodbye!');
+		Message::instance()->info(Kohana::message('a2', 'logout.success'));
 
-		// Return message if an ajax request
-		if (Request::$is_ajax)
+		if ( ! $this->_internal)
 		{
-			$this->template->content = $message;
+			$this->request->redirect( Route::get('admin')->uri() );
 		}
-		// Else set flash message and redirect
-		else
-		{
-			Message::instance()->info($message);
-			Request::instance()->redirect( Route::get('admin_main')->uri() );
-		}
+	}
+
+	/**
+	 * Username callback to check if username is valid
+	 */
+	public function check_username(Validate $array, $field)
+	{
+		$exists = (bool) DB::select(array('COUNT("*")', 'total_count'))
+			->from('users')
+			->where('username', '=', $array[$field])
+			->execute()->get('total_count');
+
+		if ( ! $exists)
+			$array->error($field, 'not_found', array($array[$field]));
 	}
 
 }
