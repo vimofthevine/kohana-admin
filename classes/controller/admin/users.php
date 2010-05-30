@@ -1,47 +1,61 @@
 <?php defined('SYSPATH') OR die('No direct script access.');
 
 /**
- * @package     Controller
+ * @package     Admin
+ * @category    Controller
  * @author      Kyle Treubig
  * @copyright   (c) 2010 Kyle Treubig
  * @license     MIT
  */
-class Controller_Admin_Users extends Controller_Template_Admin {
+class Controller_Admin_Users extends Controller_Admin {
 
-	/**
-	 * Register controller as an admin controller
-	 */
-	public function before() {
-		parent::before();
+	protected $_resource = 'user';
 
-		$this->restrict('user', 'manage');
-		unset($this->template->menu->menu['Users'][0]);
-	}
+	protected $_acl_map = array(
+		'view'    => 'view',
+		'new'     => 'create',
+		'edit'    => 'edit',
+		'delete'  => 'delete',
+		'default' => 'manage',
+	);
 
-	/**
-	 * Default action to list
-	 */
-	public function action_index() {
-		$this->action_list();
-	}
+	protected $_acl_required = 'all';
+
+	protected $_view_map = array(
+		'new'     => 'admin/layout/narrow_column_with_menu',
+		'edit'    => 'admin/layout/narrow_column_with_menu',
+		'default' => 'admin/layout/wide_column_with_menu',
+	);
+
+	protected $_resource_required = array('view', 'edit', 'delete');
+
+	protected $_current_nav = 'admin/users';
 
 	/**
 	 * Generate menu for user management
 	 */
-	private function menu() {
+	protected function _menu() {
 		return View::factory('admin/users/menu');
 	}
 
 	/**
-	 * Display menu for user management
+	 * Load a specified user
 	 */
-	public function action_menu() {
-		if ( ! $this->internal_request)
+	protected function _load_resource() {
+		$id = $this->request->param('id', 0);
+		$this->_resource = Sprig::factory('user', array('id'=>$id))->load();
+		if ( ! $this->_resource->loaded())
 		{
-			Request::instance()->redirect( Route::get('admin_main')->uri(array('controller'=>'users')) );
+			throw new Kohana_Exception('That user does not exist.', NULL, 404);
 		}
+	}
 
-		$this->template->content = $this->menu();
+	/**
+	 * Redirect index action to list
+	 */
+	public function action_index() {
+		$this->request->redirect( $this->request->uri(
+			array('action' => 'list')), 301);
 	}
 
 	/**
@@ -49,46 +63,9 @@ class Controller_Admin_Users extends Controller_Template_Admin {
 	 */
 	public function action_list() {
 		Kohana::$log->add(Kohana::DEBUG, 'Executing Controller_Users::action_list');
-
+		$this->template->content = View::factory('admin/users/list')
+			->bind('users', $users);
 		$users = Sprig::factory('user')->load(NULL, FALSE);
-
-		// Check if there are any users to display
-		if (count($users) == 0)
-		{
-			$hmvc = View::factory('admin/users/hmvc/none');
-
-			$view = View::factory('admin/users/list')
-				->set('menu', $this->menu())
-				->set('list', $hmvc);
-
-			$this->template->content = $this->internal_request ? $hmvc : $view;
-			return;
-		}
-
-		// Create user list
-		$grid = new Grid;
-		$grid->column()->field('id')->title('ID');
-		$grid->column('action')->title('Username')->text('{username}')
-			->route(Route::get('admin_main'))->params(array('controller'=>'users', 'action'=>'view'));
-		$grid->column()->field('role')->title('Role');
-		$grid->column()->field('email')->title('Email');
-		$grid->column('action')->title('Actions')->text('Edit')->class('edit')
-			->route(Route::get('admin_main'))->params(array('controller'=>'users', 'action'=>'edit'));
-		$grid->column('action')->title('')->text('Delete')->class('delete')
-			->route(Route::get('admin_main'))->params(array('controller'=>'users', 'action'=>'delete'));
-		$grid->data($users);
-
-		// Setup HMVC view with data
-		$hmvc = View::factory('admin/users/hmvc/list')
-			->set('grid', $grid);
-
-		// Setup template view
-		$view = View::factory('admin/users/list')
-			->set('menu', $this->menu())
-			->set('list', $hmvc);
-
-		// Set request response
-		$this->template->content = $this->internal_request ? $hmvc : $view;
 	}
 
 	/**
@@ -96,57 +73,8 @@ class Controller_Admin_Users extends Controller_Template_Admin {
 	 */
 	public function action_view() {
 		Kohana::$log->add(Kohana::DEBUG, 'Executing Controller_Users::action_view');
-
-		$id = Request::instance()->param('id');
-		$user = Sprig::factory('user', array('id'=>$id))->load();
-
-		// If user is invalid, return to list
-		if ( ! $user->loaded())
-		{
-			$message = __('That user does not exist.');
-
-			// Return message if an ajax request
-			if (Request::$is_ajax)
-			{
-				$this->template->content = $message;
-			}
-			// Else set flash message and redirect
-			else
-			{
-				Message::instance()->error($message);
-				Request::instance()->redirect( Route::get('admin_main')->uri(array('controller'=>'users')) );
-			}
-		}
-
-		// Restrict access
-		if ( ! $this->a2->allowed($user, 'view'))
-		{
-			$message = __('You do not have permission to view :name\'s details.', array(':name'=>$user->username));
-
-			// Return message if an ajax request
-			if (Request::$is_ajax)
-			{
-				$this->template->content = $message;
-			}
-			// Else set flash message and redirect
-			else
-			{
-				Message::instance()->error($message);
-				Request::instance()->redirect( Route::get('admin_main')->uri(array('controller'=>'users')) );
-			}
-		}
-
-		// Setup HMVC view with data
-		$hmvc = View::factory('admin/users/hmvc/view')
-			->set('user', $user);
-
-		// Setup template view
-		$view = View::factory('admin/users/view')
-			->set('menu', $this->menu())
-			->set('details', $hmvc);
-
-		// Set request response
-		$this->template->content = $this->internal_request ? $hmvc : $view;
+		$this->template->content = View::factory('admin/users/view')
+			->bind('user', $this->_resource);
 	}
 
 	/**
@@ -154,60 +82,30 @@ class Controller_Admin_Users extends Controller_Template_Admin {
 	 */
 	public function action_new() {
 		Kohana::$log->add(Kohana::DEBUG, 'Executing Controller_Users::action_new');
-
-		// Restrict access
-		if ( ! $this->a2->allowed('user', 'create'))
-		{
-			$message = __('You do not have permission to create new users.');
-
-			// Return message if an ajax request
-			if (Request::$is_ajax)
-			{
-				$this->template->content = $message;
-			}
-			// Else set flash message and redirect
-			else
-			{
-				Message::instance()->error($message);
-				Request::instance()->redirect( Route::get('admin_main')->uri(array('controller'=>'users')) );
-			}
-		}
+		$this->template->content = View::factory('admin/users/form')
+			->set('legend', __('Create User'))
+			->set('submit', __('Create'))
+			->bind('user', $user)
+			->bind('errors', $errors);
 
 		$user = Sprig::factory('user')->values($_POST);
 
-		try
+		if ($_POST)
 		{
-			$user->create();
-			$message = __('The user, :name, has been created.', array(':name'=>$user->username));
-
-			// Return message if an ajax request
-			if (Request::$is_ajax)
+			try
 			{
-				$this->template->content = $message;
+				$user->create();
+
+				Message::instance()->info('The user, :name, has been created.',
+					array(':name' => $user->username));
+
+				if ( ! $this->_internal)
+					$this->request->redirect( $this->request->uri(array('action'=>'list')) );
 			}
-			// Else set flash message and redirect
-			else
+			catch (Validate_Exception $e)
 			{
-				Message::instance()->info($message);
-				Request::instance()->redirect( Route::get('admin_main')->uri(array('controller'=>'users')) );
+				$errors = $e->array->errors('admin');
 			}
-		}
-		catch (Validate_Exception $e)
-		{
-			// Setup HMVC view with data
-			$hmvc = View::factory('admin/users/hmvc/form')
-				->set('legend', __('Create User'))
-				->set('submit', __('Create'))
-				->set('user', $user)
-				->set('errors', count($_POST) ? $e->array->errors('admin') : array() );
-
-			// Setup template view
-			$view = View::factory('admin/users/form')
-				->set('menu', $this->menu())
-				->set('form', $hmvc);
-
-			// Set request response
-			$this->template->content = $this->internal_request ? $hmvc : $view;
 		}
 	}
 
@@ -216,45 +114,14 @@ class Controller_Admin_Users extends Controller_Template_Admin {
 	 */
 	public function action_edit() {
 		Kohana::$log->add(Kohana::DEBUG, 'Executing Controller_Users::action_edit');
+		$this->template->content = View::factory('admin/users/form')
+			->set('legend', __('Modify User'))
+			->set('submit', __('Save'))
+			->bind('user', $this->_resource)
+			->bind('errors', $errors);
 
-		$id = Request::instance()->param('id');
-		$user = Sprig::factory('user', array('id'=>$id))->load();
-
-		// If user is invalid, return to list
-		if ( ! $user->loaded())
-		{
-			$message = __('That user does not exist.');
-
-			// Return message if an ajax request
-			if (Request::$is_ajax)
-			{
-				$this->template->content = $message;
-			}
-			// Else set flash message and redirect
-			else
-			{
-				Message::instance()->error($message);
-				Request::instance()->redirect( Route::get('admin_main')->uri(array('controller'=>'users')) );
-			}
-		}
-
-		// Restrict access
-		if ( ! $this->a2->allowed($user, 'edit'))
-		{
-			$message = __('You do not have permission to modify :name.', array(':name'=>$user->username));
-
-			// Return message if an ajax request
-			if (Request::$is_ajax)
-			{
-				$this->template->content = $message;
-			}
-			// Else set flash message and redirect
-			else
-			{
-				Message::instance()->error($message);
-				Request::instance()->redirect( Route::get('admin_main')->uri(array('controller'=>'users')) );
-			}
-		}
+		// Bind locally
+		$user = & $this->_resource;
 
 		// Restrict promotion (change in role)
 		if ( ! $this->a2->allowed($user, 'promote'))
@@ -275,46 +142,25 @@ class Controller_Admin_Users extends Controller_Template_Admin {
 			unset($_POST['password_confirm']);
 		}
 
-		$user->values($_POST);
-
-		// Setup HMVC view with data
-		$hmvc = View::factory('admin/users/hmvc/form')
-			->set('legend', __('Modify User'))
-			->set('submit', __('Save'))
-			->set('user', $user);
-
-		if (count($_POST))
+		if ($_POST)
 		{
+			$user->values($_POST);
+
 			try
 			{
 				$user->update();
-				$message = __('The user, :name, has been modified.', array(':name'=>$user->username));
 
-				// Return message if an ajax request
-				if (Request::$is_ajax)
-				{
-					$this->template->content = $message;
-				}
-				// Else set flash message and redirect
-				else
-				{
-					Message::instance()->info($message);
-					Request::instance()->redirect( Route::get('admin_main')->uri(array('controller'=>'users')) );
-				}
+				Message::instance()->info('The user, :name, has been modified.',
+					array(':name' => $user->username));
+
+				if ( ! $this->_internal)
+					$this->request->redirect( $this->request->uri(array('action'=>'list')) );
 			}
 			catch (Validate_Exception $e)
 			{
-				$hmvc->errors = count($_POST) ? $e->array->errors('admin') : array();
+				$errors = $e->array->errors('admin');
 			}
 		}
-
-		// Setup template view
-		$view = View::factory('admin/users/form')
-			->set('menu', $this->menu())
-			->set('form', $hmvc);
-
-		// Set request response
-		$this->template->content = $this->internal_request ? $hmvc : $view;
 	}
 
 	/**
@@ -327,18 +173,15 @@ class Controller_Admin_Users extends Controller_Template_Admin {
 
 		if ($user !== FALSE)
 		{
-			Request::instance()->redirect( Route::get('admin_main')
-				->uri(array(
-					'controller' => 'users',
-					'action'     => 'edit',
-					'id'         => $user->id,
-				))
-			);
+			$this->request->redirect( $this->request->uri(array(
+				'action'     => 'edit',
+				'id'         => $user->id,
+			)) );
 		}
 		else
 		{
 			Message::instance()->error('You must be logged in to do that.');
-			Request::instance()->redirect( Route::get('admin_auth')
+			$this->request->redirect( Route::get('admin/auth')
 				->uri(array('action'=>'login'))
 			);
 		}
@@ -352,49 +195,14 @@ class Controller_Admin_Users extends Controller_Template_Admin {
 
 		// If deletion is not desired, redirect to list
 		if (isset($_POST['no']))
-		{
-			Request::instance()->redirect( Route::get('admin_main')->uri(array('controller'=>'users')) );
-		}
+			$this->request->redirect( $this->request->uri(array('action'=>'list')) );
 
-		$id = Request::instance()->param('id');
-		$user = Sprig::factory('user', array('id'=>$id))->load();
+		$this->template->content = View::factory('admin/users/delete')
+			->bind('user', $this->_resource);
+
+		// Bind locally
+		$user = & $this->_resource;
 		$name = $user->username;
-
-		// If user is invalid, return to list
-		if ( ! $user->loaded())
-		{
-			$message = __('That user does not exist.');
-
-			// Return message if an ajax request
-			if (Request::$is_ajax)
-			{
-				$this->template->content = $message;
-			}
-			// Else set flash message and redirect
-			else
-			{
-				Message::instance()->error($message);
-				Request::instance()->redirect( Route::get('admin_main')->uri(array('controller'=>'users')) );
-			}
-		}
-
-		// Restrict access
-		if ( ! $this->a2->allowed($user, 'delete'))
-		{
-			$message = __('You do not have permission to delete :name.', array(':name'=>$name));
-
-			// Return message if an ajax request
-			if (Request::$is_ajax)
-			{
-				$this->template->content = $message;
-			}
-			// Else set flash message and redirect
-			else
-			{
-				Message::instance()->error($message);
-				Request::instance()->redirect( Route::get('admin_main')->uri(array('controller'=>'users')) );
-			}
-		}
 
 		// If deletion is confirmed
 		if (isset($_POST['yes']))
@@ -402,50 +210,22 @@ class Controller_Admin_Users extends Controller_Template_Admin {
 			try
 			{
 				$user->delete();
-				$message = __('The user, :name, has been deleted.', array(':name'=>$name));
+				Message::instance()->info('The user, :name, has been deleted.',
+					array(':name' => $name));
 
-				// Return message if an ajax request
-				if (Request::$is_ajax)
-				{
-					$this->template->content = $message;
-				}
-				// Else set flash message and redirect
-				else
-				{
-					Message::instance()->info($message);
-					Request::instance()->redirect( Route::get('admin_main')->uri(array('controller'=>'users')) );
-				}
+				if ( ! $this->_internal)
+					$this->request->redirect( $this->request->uri(array('action'=>'list')) );
 			}
 			catch (Exception $e)
 			{
 				Kohana::$log->add(Kohana::ERROR, 'Error occured deleting user, id='.$user->id.', '.$e->getMessage());
-				$message = __('An error occured deleting user, :name.', array(':name'=>$name));
+				Message::instance()->error('An error occured deleting user, :name.',
+					array(':name' => $name));
 
-				// Return message if an ajax request
-				if (Request::$is_ajax)
-				{
-					$this->template->content = $message;
-				}
-				// Else set flash message and redirect
-				else
-				{
-					Message::instance()->error($message);
-					Request::instance()->redirect( Route::get('admin_main')->uri(array('controller'=>'users')) );
-				}
+				if ( ! $this->_internal)
+					$this->request->redirect( $this->request->uri(array('action'=>'list')) );
 			}
 		}
-
-		// Setup HMVC view with data
-		$hmvc = View::factory('admin/users/hmvc/delete')
-			->set('user', $user);
-
-		// Setup template view
-		$view = View::factory('admin/users/delete')
-			->set('menu', $this->menu())
-			->set('confirm', $hmvc);
-
-		// Set request response
-		$this->template->content = $this->internal_request ? $hmvc : $view;
 	}
 
 }	// End of Controller_Admin_Users

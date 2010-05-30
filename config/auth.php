@@ -27,8 +27,10 @@ return array(
 	 */
 	'roles' => array
 	(
+		/*
 		'user'  => 'guest',
 		'admin' => 'user'
+		 */
 	),
 
 	/*
@@ -43,9 +45,9 @@ return array(
 	 */
 	'resources' => array
 	(
-		'page'  => NULL,
-		'asset' => NULL,
+		/*
 		'user'  => NULL,
+		 */
 	),
 
 	/*
@@ -62,12 +64,6 @@ return array(
 		'allow' => array
 		(
 			/*
-			'acl_disable' => array(
-				'role'      => NULL,
-				'resource'  => NULL,
-				'privilege' => NULL,
-			),
-			 */
 			'user_management' => array(
 				'role'      => 'user',
 				'resource'  => 'user',
@@ -84,24 +80,11 @@ return array(
 				'resource'  => 'user',
 				'privilege' => NULL,
 			),
-			'page_management' => array(
-				'role'      => 'admin',
-				'resource'  => 'page',
-				'privilege' => NULL,
-			),
-			'asset_management' => array(
-				'role'      => 'admin',
-				'resource'  => 'asset',
-				'privilege' => NULL,
-			),
-			'blog_management' => array(
-				'role'      => 'admin',
-				'resource'  => 'blog',
-				'privilege' => NULL,
-			),
+			 */
 		),
 		'deny' => array
 		(
+			/*
 			'user_promotion' => array(
 				'role'      => 'admin',
 				'resource'  => 'user',
@@ -114,6 +97,7 @@ return array(
 				'privilege' => 'delete',
 				'assertion' => array('Acl_Assert_Argument', array('id'=>'id')),
 			),
+			 */
 		)
 	)
 );

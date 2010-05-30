@@ -3,12 +3,13 @@
 /**
  * Flash message handler
  *
- * @package     Message
+ * @package     Kohana
+ * @category    Base
  * @author      Kyle Treubig
  * @copyright   (c) 2010 Kyle Treubig
  * @license     MIT
  */
-abstract class Message_Core {
+abstract class Kohana_Message {
 
 	/** Config */
 	private $_config;

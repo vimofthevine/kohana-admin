@@ -4,6 +4,7 @@
  * Admin media controller
  *
  * @package     Admin
+ * @category    Controller
  * @author      Kyle Treubig
  * @copyright   (c) 2010 Kyle Treubig
  * @license     MIT
