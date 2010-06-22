@@ -11,7 +11,7 @@
  */
 abstract class Controller_Admin_Base extends Controller_Template_Admin {
 
-	/*
+	/**
 	 * @var array   Action-to-privilege ACL map
 	 */
 	protected $_acl_map = array('default' => NULL);
@@ -109,16 +109,24 @@ abstract class Controller_Admin_Base extends Controller_Template_Admin {
 			Message::instance()->error($ae->getMessage(),
 				array(':resource' => $this->_resource));
 
-			// If controller-level access is denied, redirect to admin main
-			if ($this->request->action == 'index')
+			// If internal request, redirect to denied action
+			if ($this->_internal)
 			{
-				Request::instance()->redirect(Route::get('admin')->uri());
+				$this->request->action = 'denied';
 			}
-			// Else action-level access is denied, redirect to default action
 			else
 			{
-				$this->request->redirect( $this->request->uri(
-					array('action' => 'index', 'id' => NULL)) );
+				// If controller-level access is denied, redirect to admin main
+				if ($this->request->action == 'index')
+				{
+					$this->request->redirect( Route::get('admin')->uri());
+				}
+				// Else action-level access is denied, redirect to default action
+				else
+				{
+					$this->request->redirect( $this->request->uri(
+						array('action' => 'index', 'id' => NULL)) );
+				}
 			}
 		}
 		catch (Kohana_Exception $ke)
@@ -173,6 +181,12 @@ abstract class Controller_Admin_Base extends Controller_Template_Admin {
 	 * Generate menu
 	 */
 	protected function _menu() { }
+
+	/**
+	 * Controller-level access denial message for
+	 * internal requests
+	 */
+	public function action_denied() { }
 
 }	// End of Controller_Admin_Base
 
