@@ -19,7 +19,9 @@ The only configurable aspect of the template is the main navigation.  The config
     );
 
 A controller may designate any of the links in the navigation as the active page by
-including the following line, replacing "Display text" with the appropriate value.
+setting the protected variable, `_current_nav`, with the URL of the navigation item.
 
-    $this->_config['menu']['Display text'] = NULL;
+    $this->_current_nav = 'admin/foo';
+    // OR
+    protected $_current_nav = 'admin/bar';
 

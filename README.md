@@ -4,6 +4,8 @@ The admin module is meant to facilitate the rapid development of an end-user
 administration site.  There are essentially two aspects provided by the module,
 the template and the framework.
 
+** The admin template submodule has to be initialized/downloaded **
+
 ## Features
  - Template integration, courtesy of Colonel-Rosa
  - Resource handling
