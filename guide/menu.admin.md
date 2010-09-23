@@ -1,9 +1,17 @@
 1. **Admin**
  - [Overview](admin.overview)
- - [Getting Started](admin.gettingstarted)
- - [The Template](admin.template)
- - [Working with Resources](admin.resources)
- - [Access Control](admin.acl)
- - [Layout Integration](admin.layout)
- - [Dependencies](admin.dependencies)
-
+ - Getting Started
+     - [Dependencies](admin.dependencies)
+     - [Installation](admin.installation)
+     - [Configuration](admin.configuration)
+     - [Creating the First User](admin.usermgmt)
+ - Behind the Scenes
+     - [Terms and Definitions](admin.terms)
+     - [Extension Routing and Processing](admin.routing)
+ - Developer's Guide
+     - [Creating a Custom Extension](admin.customextension)
+     - [Using the CRUD Admin Extension](admin.crudextension)
+     - [Creating a Dashboard Widget](admin.dashboardwidget)
+     - [Creating a Sub-Menu](admin.submenu)
+     - [Extension Registration](admin.registration)
+ - [Tutorials](admin.tutorials)
