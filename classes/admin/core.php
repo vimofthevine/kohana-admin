@@ -67,6 +67,12 @@ class Admin_Core {
 		if (in_array($extension, $blacklist))
 			return;
 
+		// Create extension group array if one doesn't exist
+		if ( ! isset(self::$extensions[$group]))
+		{
+			self::$extensions[$group] = array();
+		}
+
 		if ($first === TRUE)
 		{
 			// Place the extension at the top of the stack
@@ -75,7 +81,7 @@ class Admin_Core {
 		else
 		{
 			// Place the extension at the bottom of the stack
-			self::$extensions[$group][] = $extension;
+			array_push(self::$extensions[$group], $extension);
 		}
 	}
 

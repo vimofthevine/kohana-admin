@@ -1,6 +1,9 @@
 <?php defined('SYSPATH') OR die('No direct script access.');
 
 return array(
+	// A2 instance name
+	'a2' => 'auth',
+
 	'extensions' => array(
 		// List of extensions to exclude from the Admin App
 		'blacklist' => array(),

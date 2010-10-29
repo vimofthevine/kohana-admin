@@ -20,11 +20,32 @@
 class Admin_Application_NavigationTest extends Kohana_Unittest_TestCase {
 
 	/**
+	 * Reset the Admin App before performing all tests
+	 */
+	public function setUp()
+	{
+		$server['route'] = 'admin';
+		$request = Request::instance($server['route']);
+		Admin::reset();
+	}
+
+	/**
 	 * Test that the top-level navigation
 	 * displays a login link
 	 */
 	public function test_top_nav_displays_login_link()
 	{
+		$a2 = $this->getMock('A2');
+		$a2->expects($this->once())
+			->method('logged_in')
+			->will($this->returnValue(FALSE));
+
+		// Get the top-level navigation view
+		$view = new View_Admin_Nav_Top;
+		$view->a2 = $a2;
+
+		$nav = $view->items();
+		$this->assertArrayHasKey(__('Login'), $nav);
 	}
 
 	/**
@@ -33,6 +54,17 @@ class Admin_Application_NavigationTest extends Kohana_Unittest_TestCase {
 	 */
 	public function test_top_nav_displays_logout_link()
 	{
+		$a2 = $this->getMock('A2');
+		$a2->expects($this->once())
+			->method('logged_in')
+			->will($this->returnValue(TRUE));
+
+		// Get the top-level navigation view
+		$view = new View_Admin_Nav_Top;
+		$view->a2 = $a2;
+
+		$nav = $view->items();
+		$this->assertArrayHasKey(__('Logout'), $nav);
 	}
 
 	/**
@@ -41,6 +73,11 @@ class Admin_Application_NavigationTest extends Kohana_Unittest_TestCase {
 	 */
 	public function test_top_nav_displays_dashboard_link()
 	{
+		// Get the top-level navigation view
+		$view = new View_Admin_Nav_Top;
+
+		$nav = $view->items();
+		$this->assertArrayHasKey(__('Home'), $nav);
 	}
 
 	/**
@@ -49,6 +86,16 @@ class Admin_Application_NavigationTest extends Kohana_Unittest_TestCase {
 	 */
 	public function test_top_nav_displays_registered_groups()
 	{
+		// Register some extensions with the Admin App
+		Admin::register('profiles', 'users');
+		Admin::register('articles', 'blog');
+
+		// Get the top-level navigation view
+		$view = new View_Admin_Nav_Top;
+		$nav = $view->items();
+
+		// Verify dashboard, login, and group links
+		$this->assertEquals(4, count($nav));
 	}
 
 	/**
@@ -57,6 +104,17 @@ class Admin_Application_NavigationTest extends Kohana_Unittest_TestCase {
 	 */
 	public function test_top_nav_displays_group_names()
 	{
+		// Register some extensions with the Admin App
+		Admin::register('profiles', 'users');
+		Admin::register('articles', 'blog');
+
+		// Get the top-level navigation view
+		$view = new View_Admin_Nav_Top;
+		$nav = $view->items();
+
+		// Verify extension names displayed
+		$this->assertArrayHasKey(__('Users'), $nav);
+		$this->assertArrayHasKey(__('Blog'),  $nav);
 	}
 
 	/**
@@ -65,14 +123,54 @@ class Admin_Application_NavigationTest extends Kohana_Unittest_TestCase {
 	 */
 	public function test_top_nav_displays_first_extension_as_link()
 	{
+		// Register some extensions with the Admin App
+		Admin::register('categories', 'blog');
+		Admin::register('articles',   'blog');
+
+		// Get the top-level navigation view
+		$view = new View_Admin_Nav_Top;
+		$nav = $view->items();
+
+		// Get the URL for the categories extension
+		$route = Route::get('admin/external')->uri(array('extension' => 'categories'));
+
+		// Verify the URL for the blog category is the categories URL
+		$this->assertEquals($route, $nav[__('Blog')]['url']);
+	}
+
+	/**
+	 * Provider for testing that the top-level navigation
+	 * marks the current group as active
+	 */
+	public function provider_test_nav_displays_current_group_as_active()
+	{
+		return array(
+			array('admin',            'Home'),
+			array('admin/categories', 'Blog'),
+			array('admin/login',      'Login'),
+		);
 	}
 
 	/**
 	 * Test that the top-level navigation displays
 	 * the current extension group as active
+	 *
+	 * @dataProvider provider_test_nav_displays_current_group_as_active
 	 */
-	public function test_top_nav_displays_current_group_as_active()
+	public function test_top_nav_displays_current_group_as_active($uri, $group)
 	{
+		// Setup request URI
+		Request::$instance = Request::factory($uri);
+
+		// Register some extensions with the Admin App
+		Admin::register('categories', 'blog');
+
+		// Get the top-level navigation view
+		$view = new View_Admin_Nav_Top;
+		$nav = $view->items();
+
+		// Verify the URL for the blog category is the categories URL
+		$this->assertTrue($nav[__($group)]['active']);
 	}
 
 	/**
@@ -81,6 +179,19 @@ class Admin_Application_NavigationTest extends Kohana_Unittest_TestCase {
 	 */
 	public function test_second_nav_displayed_for_multiple_extensions()
 	{
+		// Setup request URI
+		Request::$instance = Request::factory('admin/categories');
+
+		// Register some extensions with the Admin App
+		Admin::register('categories', 'blog');
+		Admin::register('articles',   'blog');
+
+		// Get the second-level navigation view
+		$view = new View_Admin_Nav_Second;
+		$nav = $view->items();
+
+		// Verify extension links
+		$this->assertEquals(2, count($nav));
 	}
 
 	/**
@@ -89,6 +200,20 @@ class Admin_Application_NavigationTest extends Kohana_Unittest_TestCase {
 	 */
 	public function test_second_nav_displays_registered_extension_names()
 	{
+		// Setup request URI
+		Request::$instance = Request::factory('admin/admins');
+
+		// Register some extensions with the Admin App
+		Admin::register('admins', 'users');
+		Admin::register('mods',   'users');
+
+		// Get the second-level navigation view
+		$view = new View_Admin_Nav_Second;
+		$nav = $view->items();
+
+		// Verify extension names displayed
+		$this->assertArrayHasKey(__('Admins'), $nav);
+		$this->assertArrayHasKey(__('Mods'),   $nav);
 	}
 
 	/**
@@ -97,22 +222,43 @@ class Admin_Application_NavigationTest extends Kohana_Unittest_TestCase {
 	 */
 	public function test_second_nav_displays_extension_index_actions()
 	{
+		// Setup request URI
+		Request::$instance = Request::factory('admin/categories');
+
+		// Register some extensions with the Admin App
+		Admin::register('categories', 'blog');
+		Admin::register('articles',   'blog');
+
+		// Get the second-level navigation view
+		$view = new View_Admin_Nav_Second;
+		$nav = $view->items();
+
+		// Verify the URL for the extensions are used
+		$route = Route::get('admin/external')->uri(array('extension' => 'categories'));
+		$this->assertEquals($route, $nav[__('Categories')]['url']);
+
+		$route = Route::get('admin/external')->uri(array('extension' => 'articles'));
+		$this->assertEquals($route, $nav[__('Articles')]['url']);
 	}
 
 	/**
-	 * Test that a third-level navigation is displayed
-	 * for a matching extension-action pair
+	 * Test that the second-level navigation displays
+	 * the group as the navigation heading
 	 */
-	public function test_third_nav_displayed_for_matching_ext_action_pair()
+	public function test_second_nav_displays_group_as_heading()
 	{
-	}
+		// Setup request URI
+		Request::$instance = Request::factory('admin/categories');
 
-	/**
-	 * Test that a third-level navigation is displayed
-	 * for a matching extension
-	 */
-	public function test_third_nav_displayed_for_matching_extension()
-	{
+		// Register some extensions with the Admin App
+		Admin::register('categories', 'blog');
+		Admin::register('articles',   'blog');
+
+		// Get the second-level navigation view
+		$view = new View_Admin_Nav_Second;
+
+		// Verify heading
+		$this->assertEquals('Blog Management', $view->heading());
 	}
 
 }	// End of Admin_Application_NavigationTest
