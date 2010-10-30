@@ -20,14 +20,7 @@ Route::set('admin/auth', 'admin/<action>', array(
 // Internal extension route
 Route::set('admin/extension', 'admin/extension/<controller>(/<action>(/<id>))')
 	->defaults(array(
-		'directory'  => 'admin',
-	));
-
-// Internal widget route
-Route::set('admin/widget', 'admin/widget/<extension>(/<action>(/<id>))')
-	->defaults(array(
-		'directory'  => 'admin',
-		'controller' => 'widget',
+		'directory'  => 'admin/extension',
 	));
 
 // External extension route

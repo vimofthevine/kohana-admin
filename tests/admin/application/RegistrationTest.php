@@ -203,7 +203,7 @@ class Admin_Application_RegistrationTest extends Kohana_Unittest_TestCase {
 		$config->set('admin', $config->as_array());
 
 		// Attempt to register the widget
-		Admin::register('blocked-widget');
+		Admin::widget('blocked-widget', 'url/to/widget');
 
 		// Verify widget was not registered
 		$this->assertFalse(Admin::registered('blocked-widget', TRUE));

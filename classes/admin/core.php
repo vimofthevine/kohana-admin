@@ -11,6 +11,21 @@
  */
 class Admin_Core {
 
+	/** 200 Response Code */
+	const RESPONSE_200 = 200;
+
+	/** 301 Response Code */
+	const RESPONSE_301 = 301;
+
+	/** 400 Response Code */
+	const RESPONSE_400 = 400;
+
+	/** 403 Response Code */
+	const RESPONSE_403 = 403;
+
+	/** 404 Response Code */
+	const RESPONSE_404 = 404;
+
 	/**
 	 * @var array   Registered extensions
 	 */
@@ -31,6 +46,8 @@ class Admin_Core {
 	 */
 	public static function reset()
 	{
+		Kohana::$log->add(Kohana::DEBUG, 'Resetting Admin App');
+
 		self::$extensions  = array();
 		self::$navigations = array();
 		self::$widgets     = array();
@@ -65,7 +82,11 @@ class Admin_Core {
 
 		// If the extension is blacklisted, do nothing
 		if (in_array($extension, $blacklist))
+		{
+			Kohana::$log->add(Kohana::DEBUG, 'Extension :name is blacklisted, aborting registration',
+				array(':name' => $extension));
 			return;
+		}
 
 		// Create extension group array if one doesn't exist
 		if ( ! isset(self::$extensions[$group]))
@@ -180,7 +201,14 @@ class Admin_Core {
 
 		// If the widget is blacklisted, do nothing
 		if (in_array($name, $blacklist))
+		{
+			Kohana::$log->add(Kohana::DEBUG, 'Widget :name is blacklisted, aborting registration',
+				array(':name' => $name));
 			return;
+		}
+
+		Kohana::$log->add(Kohana::DEBUG, 'Registering widget :name',
+			array(':name' => $name));
 
 		// Add the widget to the registered widgets list
 		self::$widgets[$name] = $url;
@@ -189,13 +217,11 @@ class Admin_Core {
 	/**
 	 * Get the array of registered widgets
 	 *
-	 * @param   boolean Sort widgets or return in a single array
 	 * @return  The array of registered widgets
 	 */
-	public static function widgets($sorted = TRUE)
+	public static function widgets()
 	{
-		if ( ! $sorted)
-			return self::$widgets;
+		return self::$widgets;
 	}
 
 }	// End of Admin_Core
