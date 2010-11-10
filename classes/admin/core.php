@@ -26,6 +26,12 @@ class Admin_Core {
 	/** 404 Response Code */
 	const RESPONSE_404 = 404;
 
+	/** Info (user messages) */
+	const INFO = 'info';
+
+	/** Error (user messages) */
+	const ERROR = 'error';
+
 	/**
 	 * @var array   Registered extensions
 	 */
@@ -222,6 +228,53 @@ class Admin_Core {
 	public static function widgets()
 	{
 		return self::$widgets;
+	}
+
+	/**
+	 * Set flash message
+	 *
+	 * @param   string  The message contents
+	 * @param   string  The type of message
+	 */
+	public static function message($msg, $type = self::INFO)
+	{
+		// Get session
+		$session = Session::instance(Kohana::config('admin.messages.session.type'));
+
+		// Get session key from config
+		$key     = Kohana::config('admin.messages.session.key');
+
+		// Get current messages
+		$messages = unserialize($session->get($key, FALSE));
+
+		// Add message
+		$messages[$type][] = $msg;
+
+		// Store messages
+		$session->set($key, serialize($messages));
+	}
+
+	/**
+	 * Get flash messages, if any exist
+	 *
+	 * @return  An array of flash user messages
+	 */
+	public static function messages()
+	{
+		// Get session
+		$session = Session::instance(Kohana::config('admin.messages.session'));
+
+		// Get session key from config
+		$key = Kohana::config('admin.messages.session.key');
+
+		// Get messages
+		$messages = unserialize($session->get($key, FALSE));
+
+		// Delete messages
+		$session->delete($key);
+
+		// Return messages
+		return $messages;
 	}
 
 }	// End of Admin_Core

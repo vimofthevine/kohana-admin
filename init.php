@@ -17,6 +17,14 @@ Route::set('admin/auth', 'admin/<action>', array(
 		'action'     => 'login',
 	));
 
+// Admin errors
+Route::set('admin/error', 'admin/error/<action>')
+	->defaults(array(
+		'directory'  => 'admin',
+		'controller' => 'error',
+		'action'     => '404',
+	));
+
 // Internal extension route
 Route::set('admin/extension', 'admin/extension/<controller>(/<action>(/<id>))')
 	->defaults(array(
