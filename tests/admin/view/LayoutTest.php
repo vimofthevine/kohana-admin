@@ -266,6 +266,7 @@ class Admin_View_LayoutTest extends Kohana_Unittest_TestCase {
 		$view = $this->getMockForAbstractClass('View_Admin_Layout_Full');
 		$view->set('_template', 'admin/layout/narrow');
 		$view->use_layout = FALSE;
+		$this->assertRegExp('/grid/', $view->render());
 		$this->assertNotRegExp('/<html/', $view->render());
 	}
 

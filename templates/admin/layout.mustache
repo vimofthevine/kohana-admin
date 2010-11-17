@@ -1,0 +1,45 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+	<head>
+		<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+		<title>{{title}}</title>
+
+{{{stylesheets}}}
+{{{scripts}}}
+
+	</head>
+	<body>
+		<h1 id="head">{{title}}</h1>
+
+		<ul id="navigation">
+{{#top_nav_items}}
+	{{#active}} 
+			<li id="nav_{{slug}}"><span class="active">{{text}}</span></li>
+	{{/active}}
+	{{^active}}
+			<li id="nav_{{slug}}">{{{link}}}</li>
+	{{/active}}
+{{/top_nav_items}}
+		</ul>
+
+		<div id="content" class="container_16 clearfix">
+			<div class="grid_16">
+				{{#error_message}}
+					<p class="error">{{{error_message}}}</p>
+				{{/error_message}}
+
+				{{#info_message}}
+					<p class="success">{{{info_message}}}</p>
+				{{/info_message}}
+			</div>
+
+{{>body}}
+		</div>
+
+		<div id="foot">
+			<i>Designed by </i><a href="http://mathew-davies.co.uk/">Mathew Davies</a>
+		</div>
+
+	</body>
+</html>

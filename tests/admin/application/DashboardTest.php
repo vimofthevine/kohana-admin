@@ -245,4 +245,24 @@ class Admin_Application_DashboardTest extends Kohana_Unittest_TestCase {
 		$this->assertEquals('WIDGET 400', $widgets[0][0]);
 	}
 
+	/**
+	 * Test that the dashboard displays the
+	 * widget without the grid layout
+	 */
+	public function test_dashboard_displays_widget_response_without_layout()
+	{
+		// Register widget with the Admin App
+		Admin::widget('widget7', 'admin/extension/unittest/widget_view');
+
+		// Get the dashboard view
+		$view = new View_Admin_Dashboard;
+
+		// Get the widgets
+		$widgets = $view->widgets();
+
+		// Verify response not injected into layout
+		$this->assertRegExp('/grid/', $widgets[0][0]);
+		$this->assertNotRegExp('/<html/', $widgets[0][0]);
+	}
+
 }	// End of Admin_Application_DashboardTest

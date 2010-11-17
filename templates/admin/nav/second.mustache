@@ -1,0 +1,13 @@
+{{#has_menu}}
+	<h2>{{heading}}</h2>
+	<p>
+		<ul>
+{{#items}}
+			<li>{{{link}}}</li>
+{{/items}}
+		</ul>
+	</p>
+{{/has_menu}}
+{{^has_menu}}
+	&nbsp;
+{{/has_menu}}

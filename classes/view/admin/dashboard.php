@@ -109,6 +109,13 @@ class View_Admin_Dashboard extends Kostache {
 		if (isset($request->message) AND ! empty($request->message))
 			return $request->message;
 
+		// If response is an admin layout view
+		if ($request->response instanceof View_Admin_Layout_Core)
+		{
+			$request->response->use_layout = FALSE;
+			return $request->response->render();
+		}
+
 		// Return the result of the widget
 		return $request->response;
 	}

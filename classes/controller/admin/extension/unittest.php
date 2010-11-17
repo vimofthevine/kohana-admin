@@ -111,4 +111,10 @@ class Controller_Admin_Extension_Unittest extends Controller {
 		$this->request->message = "USER MESSAGE";
 	}
 
+	public function action_widget_view()
+	{
+		$this->request->response = Kostache::factory('admin/test')
+			->set('_template', 'admin/layout/narrow');
+	}
+
 }	// End of Controller_Admin_Extension_Unittest
