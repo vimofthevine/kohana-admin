@@ -4,7 +4,18 @@
 Route::set('admin', 'admin')
 	->defaults(array(
 		'directory'  => 'admin',
-		'controller' => 'dashboard',
+		'controller' => 'layout',
+	));
+
+// Media route
+Route::set('admin/media', 'admin/media/<file>', array(
+	'file' => '.+',
+	))
+	->defaults(array(
+		'directory'  => 'admin',
+		'controller' => 'media',
+		'action'     => 'file',
+		'file'       => NULL,
 	));
 
 // Auth routes

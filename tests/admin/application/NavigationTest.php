@@ -41,11 +41,12 @@ class Admin_Application_NavigationTest extends Kohana_Unittest_TestCase {
 			->will($this->returnValue(FALSE));
 
 		// Get the top-level navigation view
-		$view = new View_Admin_Nav_Top;
+		$view = $this->getMockForAbstractClass('View_Admin_Layout_Core');
 		$view->a2 = $a2;
 
-		$nav = $view->items();
-		$this->assertArrayHasKey(__('Login'), $nav);
+		$nav = $view->primary_nav_items();
+		$end = count($nav) - 1;
+		$this->assertEquals(__('Login'), $nav[$end]['text']);
 	}
 
 	/**
@@ -60,11 +61,12 @@ class Admin_Application_NavigationTest extends Kohana_Unittest_TestCase {
 			->will($this->returnValue(TRUE));
 
 		// Get the top-level navigation view
-		$view = new View_Admin_Nav_Top;
+		$view = $this->getMockForAbstractClass('View_Admin_Layout_Core');
 		$view->a2 = $a2;
 
-		$nav = $view->items();
-		$this->assertArrayHasKey(__('Logout'), $nav);
+		$nav = $view->primary_nav_items();
+		$end = count($nav) - 1;
+		$this->assertEquals(__('Logout'), $nav[$end]['text']);
 	}
 
 	/**
@@ -74,10 +76,10 @@ class Admin_Application_NavigationTest extends Kohana_Unittest_TestCase {
 	public function test_top_nav_displays_dashboard_link()
 	{
 		// Get the top-level navigation view
-		$view = new View_Admin_Nav_Top;
+		$view = $this->getMockForAbstractClass('View_Admin_Layout_Core');
 
-		$nav = $view->items();
-		$this->assertArrayHasKey(__('Home'), $nav);
+		$nav = $view->primary_nav_items();
+		$this->assertEquals(__('Home'), $nav[0]['text']);
 	}
 
 	/**
@@ -91,8 +93,8 @@ class Admin_Application_NavigationTest extends Kohana_Unittest_TestCase {
 		Admin::register('articles', 'blog');
 
 		// Get the top-level navigation view
-		$view = new View_Admin_Nav_Top;
-		$nav = $view->items();
+		$view = $this->getMockForAbstractClass('View_Admin_Layout_Core');
+		$nav = $view->primary_nav_items();
 
 		// Verify dashboard, login, and group links
 		$this->assertEquals(4, count($nav));
@@ -109,12 +111,12 @@ class Admin_Application_NavigationTest extends Kohana_Unittest_TestCase {
 		Admin::register('articles', 'blog');
 
 		// Get the top-level navigation view
-		$view = new View_Admin_Nav_Top;
-		$nav = $view->items();
+		$view = $this->getMockForAbstractClass('View_Admin_Layout_Core');
+		$nav = $view->primary_nav_items();
 
 		// Verify extension names displayed
-		$this->assertArrayHasKey(__('Users'), $nav);
-		$this->assertArrayHasKey(__('Blog'),  $nav);
+		$this->assertEquals(__('Users'), $nav[1]['text']);
+		$this->assertEquals(__('Blog'), $nav[2]['text']);
 	}
 
 	/**
@@ -128,14 +130,14 @@ class Admin_Application_NavigationTest extends Kohana_Unittest_TestCase {
 		Admin::register('articles',   'blog');
 
 		// Get the top-level navigation view
-		$view = new View_Admin_Nav_Top;
-		$nav = $view->items();
+		$view = $this->getMockForAbstractClass('View_Admin_Layout_Core');
+		$nav = $view->primary_nav_items();
 
 		// Get the URL for the categories extension
 		$route = Route::get('admin/external')->uri(array('extension' => 'categories'));
 
 		// Verify the URL for the blog category is the categories URL
-		$this->assertEquals($route, $nav[__('Blog')]['url']);
+		$this->assertEquals($route, $nav[1]['url']);
 	}
 
 	/**
@@ -145,9 +147,9 @@ class Admin_Application_NavigationTest extends Kohana_Unittest_TestCase {
 	public function provider_test_nav_displays_current_group_as_active()
 	{
 		return array(
-			array('admin',            'Home'),
-			array('admin/categories', 'Blog'),
-			array('admin/login',      'Login'),
+			array('admin',            0),
+			array('admin/categories', 1),
+			array('admin/login',      2),
 		);
 	}
 
@@ -157,7 +159,7 @@ class Admin_Application_NavigationTest extends Kohana_Unittest_TestCase {
 	 *
 	 * @dataProvider provider_test_nav_displays_current_group_as_active
 	 */
-	public function test_top_nav_displays_current_group_as_active($uri, $group)
+	public function test_top_nav_displays_current_group_as_active($uri, $index)
 	{
 		// Setup request URI
 		Request::$instance = Request::factory($uri);
@@ -166,11 +168,11 @@ class Admin_Application_NavigationTest extends Kohana_Unittest_TestCase {
 		Admin::register('categories', 'blog');
 
 		// Get the top-level navigation view
-		$view = new View_Admin_Nav_Top;
-		$nav = $view->items();
+		$view = $this->getMockForAbstractClass('View_Admin_Layout_Core');
+		$nav = $view->primary_nav_items();
 
 		// Verify the URL for the blog category is the categories URL
-		$this->assertTrue($nav[__($group)]['active']);
+		$this->assertTrue($nav[$index]['active']);
 	}
 
 	/**
@@ -187,11 +189,10 @@ class Admin_Application_NavigationTest extends Kohana_Unittest_TestCase {
 		Admin::register('articles',   'blog');
 
 		// Get the second-level navigation view
-		$view = new View_Admin_Nav_Second;
-		$nav = $view->items();
+		$view = $this->getMockForAbstractClass('View_Admin_Layout_Core');
 
-		// Verify extension links
-		$this->assertEquals(2, count($nav));
+		// Verify related extensions will be displayed
+		$this->assertTrue($view->has_group_extensions());
 	}
 
 	/**
@@ -208,12 +209,12 @@ class Admin_Application_NavigationTest extends Kohana_Unittest_TestCase {
 		Admin::register('mods',   'users');
 
 		// Get the second-level navigation view
-		$view = new View_Admin_Nav_Second;
-		$nav = $view->items();
+		$view = $this->getMockForAbstractClass('View_Admin_Layout_Core');
+		$nav = $view->group_extensions();
 
 		// Verify extension names displayed
-		$this->assertArrayHasKey(__('Admins'), $nav);
-		$this->assertArrayHasKey(__('Mods'),   $nav);
+		$this->assertEquals(__('Admins'), $nav[0]['text']);
+		$this->assertEquals(__('Mods'), $nav[1]['text']);
 	}
 
 	/**
@@ -230,15 +231,15 @@ class Admin_Application_NavigationTest extends Kohana_Unittest_TestCase {
 		Admin::register('articles',   'blog');
 
 		// Get the second-level navigation view
-		$view = new View_Admin_Nav_Second;
-		$nav = $view->items();
+		$view = $this->getMockForAbstractClass('View_Admin_Layout_Core');
+		$nav = $view->group_extensions();
 
 		// Verify the URL for the extensions are used
 		$route = Route::get('admin/external')->uri(array('extension' => 'categories'));
-		$this->assertEquals($route, $nav[__('Categories')]['url']);
+		$this->assertEquals($route, $nav[0]['url']);
 
 		$route = Route::get('admin/external')->uri(array('extension' => 'articles'));
-		$this->assertEquals($route, $nav[__('Articles')]['url']);
+		$this->assertEquals($route, $nav[1]['url']);
 	}
 
 	/**
@@ -255,10 +256,10 @@ class Admin_Application_NavigationTest extends Kohana_Unittest_TestCase {
 		Admin::register('articles',   'blog');
 
 		// Get the second-level navigation view
-		$view = new View_Admin_Nav_Second;
+		$view = $this->getMockForAbstractClass('View_Admin_Layout_Core');
 
 		// Verify heading
-		$this->assertEquals('Blog Management', $view->heading());
+		$this->assertEquals('Blog Management', $view->group_mgmt_heading());
 	}
 
 }	// End of Admin_Application_NavigationTest

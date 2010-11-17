@@ -127,7 +127,7 @@ class Admin_Application_RegistrationTest extends Kohana_Unittest_TestCase {
 		Admin::register('articles', 'blog');
 
 		// Verify that registered navigation matches given group
-		$this->assertContains('Blog_Navigation_Class', Admin::nav('articles/edit'));
+		$this->assertContains('Blog_Navigation_Class', Admin::nav('articles'));
 	}
 
 	/**
@@ -152,7 +152,7 @@ class Admin_Application_RegistrationTest extends Kohana_Unittest_TestCase {
 		Admin::navigation('Edit_Navigation_Class', 'articles/edit');
 
 		// Verify that registered navigation matches given ext-action pair
-		$this->assertContains('Edit_Navigation_Class', Admin::nav('articles/edit'));
+		$this->assertContains('Edit_Navigation_Class', Admin::nav('articles', 'edit'));
 	}
 
 	/**

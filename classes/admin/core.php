@@ -150,29 +150,24 @@ class Admin_Core {
 	}
 
 	/**
-	 * Get an array of navigation views for a given
-	 * extension-action pair
+	 * Get an array of navigation views registered
+	 * for the given extension, action, and or group
 	 *
-	 * @param   string  An extension-action pair
+	 * @param   string  The extension
+	 * @param   string  [Optional] The action
+	 * @param   string  [Optional] The group
 	 * @return  Array of matching navigation views
 	 */
-	public static function nav($pair)
+	public static function nav($extension, $action = NULL, $group = NULL)
 	{
+		// If no group is given, determine group for the given extension
+		if ($group == NULL)
+		{
+			$group = self::group($extension);
+		}
+
+		// Create nav array
 		$nav = array();
-
-		// Split pair into extension and action
-		if (strpos($pair, '/') != 0)
-		{
-			list($extension, $action) = explode('/', $pair);
-		}
-		else
-		{
-			$extension = $pair;
-			$action    = '';
-		}
-
-		// Get the group the extension is registered to
-		$group = self::group($extension);
 
 		// Add navs that match the extension's group
 		if (isset(self::$navigations[$group]))
@@ -186,10 +181,14 @@ class Admin_Core {
 			$nav[] = self::$navigations[$extension];
 		}
 
-		// Add navs that match the extension-action pair
-		if (isset(self::$navigations[$extension.'/'.$action]))
+		// If action is defined
+		if ($action != NULL)
 		{
-			$nav[] = self::$navigations[$extension.'/'.$action];
+			// Add navs that match the extension-action pair
+			if (isset(self::$navigations[$extension.'/'.$action]))
+			{
+				$nav[] = self::$navigations[$extension.'/'.$action];
+			}
 		}
 
 		return $nav;
@@ -262,7 +261,7 @@ class Admin_Core {
 	public static function messages()
 	{
 		// Get session
-		$session = Session::instance(Kohana::config('admin.messages.session'));
+		$session = Session::instance(Kohana::config('admin.messages.session.type'));
 
 		// Get session key from config
 		$key = Kohana::config('admin.messages.session.key');
