@@ -1,5 +1,24 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 
+// Home/dashboard route
+Route::set('admin', 'admin')
+	->defaults(array(
+		'directory'  => 'admin',
+		'controller' => 'layout',
+	));
+
+// Media route
+Route::set('admin/media', 'admin/media/<file>', array(
+	'file' => '.+',
+	))
+	->defaults(array(
+		'directory'  => 'admin',
+		'controller' => 'media',
+		'action'     => 'file',
+		'file'       => NULL,
+	));
+
+// Auth routes
 Route::set('admin/auth', 'admin/<action>', array(
 	'action' => 'login|logout',
 	))
@@ -9,18 +28,23 @@ Route::set('admin/auth', 'admin/<action>', array(
 		'action'     => 'login',
 	));
 
-Route::set('admin/media', 'admin/media(/<file>)', array('file'=>'.+'))
+// Admin errors
+Route::set('admin/error', 'admin/error/<action>')
 	->defaults(array(
 		'directory'  => 'admin',
-		'controller' => 'media',
-		'action'     => 'file',
-		'file'       => NULL,
+		'controller' => 'error',
+		'action'     => '404',
 	));
 
-Route::set('admin', 'admin(/<controller>(/<action>(/<id>)))')
+// Internal extension route
+Route::set('admin/extension', 'admin/extension/<controller>(/<action>(/<id>))')
+	->defaults(array(
+		'directory'  => 'admin/extension',
+	));
+
+// External extension route
+Route::set('admin/external', 'admin/<extension>(/<action>(/<id>))')
 	->defaults(array(
 		'directory'  => 'admin',
-		'controller' => 'main',
-		'action'     => 'index',
+		'controller' => 'extension',
 	));
-
