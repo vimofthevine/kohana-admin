@@ -18,6 +18,7 @@ class Controller_Admin_Media extends Controller {
 		$ext = pathinfo($file, PATHINFO_EXTENSION);
 
 		$file = substr($file, 0, -(strlen($ext) + 1));
+		$_file = $file;
 
 		if ($file = Kohana::find_file('media', $file, $ext))
 		{
@@ -25,7 +26,7 @@ class Controller_Admin_Media extends Controller {
 		}
 		else
 		{
-			Kohana::$log->add(Kohana::ERROR, 'Admin media controller error while loading file, '.$file);
+			Kohana::$log->add(Kohana::ERROR, 'Admin media controller error while loading file, '.$_file);
 			$request->status = 404;
 		}
 
